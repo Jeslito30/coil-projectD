@@ -1,0 +1,17 @@
+# Project D — WireGuard client template
+# Create the tunnel locally on each laptop, phone, relay or monitored computer.
+# Never send or commit the private key or a rendered client profile.
+
+[Interface]
+Address    = <ASSIGNED_VPN_IP>/32
+PrivateKey = <LOCALLY_GENERATED_PRIVATE_KEY>
+MTU        = 1420
+
+[Peer]
+PublicKey           = <SERVER_PUBLIC_KEY>
+Endpoint            = <CLOUD_VM_PUBLIC_IP>:51820
+AllowedIPs          = 10.66.0.0/24
+PersistentKeepalive = 25
+
+# Split tunnel: only Project D VPN addresses use this tunnel.
+# Phone profiles are Phase 7 only and receive backend access, not MQTT/SSH.

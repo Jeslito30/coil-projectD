@@ -1,0 +1,24 @@
+# Re-applies the Project D DOCKER-USER rules at boot and whenever Docker restarts.
+# Install:
+#   sudo cp vpn/firewall/project-d-docker-user.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now project-d-docker-user.service
+# To enable Phase 7 rules, set Environment=ENABLE_PHASE7=1 in a drop-in
+# (sudo systemctl edit project-d-docker-user.service) and restart the unit.
+
+[Unit]
+Description=Project D DOCKER-USER firewall rules
+# Docker must have created the DOCKER-USER chain; wg0 must exist for -i wg0 rules to matter.
+After=docker.service wg-quick@wg0.service
+Requires=docker.service
+# Restarting or stopping Docker also restarts/stops this unit, so rules are re-applied.
+PartOf=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=ENABLE_PHASE7=0
+ExecStart=/opt/project-d/vpn/firewall/docker-user.sh
+
+[Install]
+WantedBy=multi-user.target docker.service
