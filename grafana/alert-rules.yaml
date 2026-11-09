@@ -1,0 +1,174 @@
+apiVersion: 1
+groups:
+    - orgId: 1
+      name: project-d
+      folder: Project D
+      interval: 30s
+      rules:
+        - uid: ag3ryb8ejpb7kf
+          title: Alert 1 - threshold
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: coil-influx
+              model:
+                intervalMs: 1000
+                maxDataPoints: 43200
+                query: |-
+                    // Alert 1 - reading outside its threshold (data-design.md, section 6.1).
+                    // Returns 1.0 if the LATEST reading of a sensor is out of range, otherwise 0.0 (one series per sensor).
+                    // Grafana rule: Reduce (Last) -> Threshold "IS ABOVE 0.5".
+                    from(bucket: "sensors")
+                      |> range(start: -10m)
+                      |> filter(fn: (r) => r._measurement == "environment" and r._field == "value")
+                      |> group(columns: ["sensor_id", "city", "sensor_type"])
+                      |> last()
+                      |> map(fn: (r) => {
+                          low = if r.sensor_type == "temperature" then (if r.city == "Mati" then 20.0 else -15.0)
+                                else if r.sensor_type == "humidity" then 40.0
+                                else -1.0
+                          high = if r.sensor_type == "temperature" then (if r.city == "Mati" then 38.0 else 20.0)
+                                 else if r.sensor_type == "humidity" then 100.0
+                                 else (if r.city == "Mati" then 55.5 else 75.0)
+                          return {r with _value: if r._value < low or r._value > high then 1.0 else 0.0}
+                      })
+                      |> keep(columns: ["_time", "_value", "sensor_id", "city", "sensor_type"])
+                refId: A
+            - refId: B
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params: []
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - B
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                refId: B
+                type: reduce
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0.5
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: B
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          noDataState: OK
+          execErrState: Error
+          isPaused: false
+          notification_settings:
+            receiver: grafana-default-email
+        - uid: fg3rzhvw4p9fkd
+          title: Alert 2 - sensor silent
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: coil-influx
+              model:
+                intervalMs: 1000
+                maxDataPoints: 43200
+                query: |
+                    // Alert 2 - sensor stopped sending (data-design.md, section 6.2).
+                    // Returns the age of the latest reading in seconds (one series per sensor).
+                    // Grafana rule: Reduce (Last) -> Threshold "IS ABOVE 120"; evaluate every 30s, pending period 0s,
+                    // "If no data: Alerting" (a sensor silent for over an hour disappears from the 1h range).
+                    from(bucket: "sensors")
+                      |> range(start: -1h)
+                      |> filter(fn: (r) => r._measurement == "environment" and r._field == "value")
+                      |> group(columns: ["sensor_id", "city", "sensor_type"])
+                      |> last()
+                      |> map(fn: (r) => ({r with _value: float(v: int(v: now()) - int(v: r._time)) / 1000000000.0}))
+                      |> keep(columns: ["_time", "_value", "sensor_id", "city", "sensor_type"])
+                refId: A
+            - refId: B
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params: []
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - B
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                refId: B
+                type: reduce
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 120
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: B
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          noDataState: Alerting
+          execErrState: Error
+          isPaused: false
+          notification_settings:
+            receiver: grafana-default-email
