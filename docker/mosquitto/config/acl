@@ -1,0 +1,50 @@
+# Project D - MQTT ACL (data-design.md, section 8).
+# Username = sensor ID. Every sensor can WRITE only its own reading and status topic and cannot read anything.
+# Explicit per-user rules are intentional: a pattern like "pattern write coil/+/+/%u" would let
+# SZCZ-TEMP-01 publish to coil/mati/humidity/SZCZ-TEMP-01.
+
+# Szczecin sensors
+user SZCZ-TEMP-01
+topic write coil/szczecin/temperature/SZCZ-TEMP-01
+topic write coil/szczecin/status/SZCZ-TEMP-01
+
+user SZCZ-HUM-01
+topic write coil/szczecin/humidity/SZCZ-HUM-01
+topic write coil/szczecin/status/SZCZ-HUM-01
+
+user SZCZ-AIR-01
+topic write coil/szczecin/airquality/SZCZ-AIR-01
+topic write coil/szczecin/status/SZCZ-AIR-01
+
+# Mati sensors
+user MATI-TEMP-01
+topic write coil/mati/temperature/MATI-TEMP-01
+topic write coil/mati/status/MATI-TEMP-01
+
+user MATI-HUM-01
+topic write coil/mati/humidity/MATI-HUM-01
+topic write coil/mati/status/MATI-HUM-01
+
+user MATI-AIR-01
+topic write coil/mati/airquality/MATI-AIR-01
+topic write coil/mati/status/MATI-AIR-01
+
+# Ingestion (Telegraf): reading topics only; status payloads are plain text and are not parsed as JSON.
+user telegraf
+topic read coil/+/temperature/+
+topic read coil/+/humidity/+
+topic read coil/+/airquality/+
+
+# Dashboard status panel: status topics only.
+user dashboard
+topic read coil/+/status/+
+
+# Security-test observer (read-only; used only by tests/security/mqtt_security_test.py).
+# Remove it from the password file outside test windows if you prefer.
+user test-observer
+topic read coil/+/temperature/+
+topic read coil/+/humidity/+
+topic read coil/+/airquality/+
+
+# Phase 7 (Wake-on-LAN, computer monitoring) identities are NOT defined here.
+# They need separate, reviewed ACL entries and must not be added to the groups above.

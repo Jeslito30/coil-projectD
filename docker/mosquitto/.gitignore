@@ -1,0 +1,8 @@
+# Secrets and private material: never commit
+secrets/
+config/passwd
+certs/*.key
+certs/*.srl
+certs/server.crt
+# The public CA certificate may be committed
+!certs/ca.crt
