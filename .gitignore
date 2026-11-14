@@ -1,0 +1,63 @@
+# ---------------------------------------------------------------
+# Project D — never commit secrets. This repository is PUBLIC.
+# ---------------------------------------------------------------
+
+# Environment files with real values (commit only *.example)
+.env
+.env.*
+!.env.example
+*.env
+!*.env.example
+
+# Private keys and certificates with keys
+*.key
+*.pem
+*.p12
+*.pfx
+# Public CA certificate is allowed: docker/mosquitto/certs/ca.crt
+*.crt
+!ca.crt
+*.csr
+*.srl
+
+# WireGuard: rendered configs and keys (templates end in .template)
+*.conf
+!*.conf.template
+!mosquitto.conf
+!telegraf.conf
+wg*.key
+wg*.pub.private
+*.qr.png
+
+# Mosquitto password file (generated from .env on the server)
+passwd
+**/mosquitto/config/passwd
+
+# Backups, restores and staging copies
+*.tar
+*.tar.gz
+*.restic
+restore-*/
+restore-backup-*/
+/var/
+
+# Test results: commit deliberately after redaction (git add -f)
+tests/**/results/*
+!tests/**/results/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Flutter / Dart
+mobile/**/build/
+mobile/**/.dart_tool/
+mobile/**/.flutter-plugins*
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
