@@ -11,6 +11,7 @@ This directory is the design baseline for Project D. It defines how simulated se
 | [architecture.md](architecture.md) | Components, data flow, trust boundaries, failure behaviour, backup and optional WoL | Joint | Draft v0.2 — both pairs to review |
 | [architecture.png](architecture.png) | System overview for reports and presentations — generated from the Mermaid code in `architecture.md` | Joint | Draft v0.2 |
 | [architecture-wol.png](architecture-wol.png) | Optional Wake-on-LAN path — generated from the Mermaid code in `architecture.md` | Joint | Draft v0.2 |
+| [wol-contract.md](wol-contract.md) | Optional Phase 7: MQTT command/result contract between backend and the Szczecin Wake-on-LAN relay, ACL entries, acceptance tests | PL (relay side) | Draft v0.1 — for review |
 | [render-diagrams.sh](render-diagrams.sh) | Regenerates both PNG files from `architecture.md` (needs Mermaid CLI `mmdc`) | Joint | — |
 | [data-design.md](data-design.md) | Sensor IDs, topics, JSON contract, publishing behaviour, alerts, ingestion and MQTT ACLs | Joint (PL draft) | Draft v0.2 — Philippines approval required |
 | [vpn-plan.md](vpn-plan.md) | WireGuard addressing, service exposure, firewall rules, key lifecycle and time synchronisation | Joint (PL draft) | Draft v0.2 — Philippines input required |
