@@ -98,7 +98,7 @@ groups:
           data:
             - refId: A
               relativeTimeRange:
-                from: 600
+                from: 2592000
                 to: 0
               datasourceUid: coil-influx
               model:
@@ -108,9 +108,11 @@ groups:
                     // Alert 2 - sensor stopped sending (data-design.md, section 6.2).
                     // Returns the age of the latest reading in seconds (one series per sensor).
                     // Grafana rule: Reduce (Last) -> Threshold "IS ABOVE 120"; evaluate every 30s, pending period 0s,
-                    // "If no data: Alerting" (a sensor silent for over an hour disappears from the 1h range).
+                    // A 30-day lookback matches the sensors bucket retention so a long-silent
+                    // sensor still has a series. Recreate per-sensor expected-state monitoring
+                    // if the retention window changes; global no-data cannot replace a lost series.
                     from(bucket: "sensors")
-                      |> range(start: -1h)
+                      |> range(start: -30d)
                       |> filter(fn: (r) => r._measurement == "environment" and r._field == "value")
                       |> group(columns: ["sensor_id", "city", "sensor_type"])
                       |> last()
