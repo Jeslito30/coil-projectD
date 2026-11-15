@@ -29,13 +29,13 @@ remove_accept() {
 }
 
 # MQTT over TLS: member laptops and simulator hosts.
-for ip in 10.66.0.11 10.66.0.12 10.66.0.15 10.66.0.21 10.66.0.22 10.66.0.25; do
+for ip in 10.66.0.10 10.66.0.21 10.66.0.22; do
   ensure_accept -i wg0 -s "$ip" -p tcp --dport 8883
 done
 
 # Grafana and team dashboard: member laptops and faculty.
-for ip in 10.66.0.11 10.66.0.12 10.66.0.21 10.66.0.22 10.66.0.31 10.66.0.32; do
-  ensure_accept -i wg0 -s "$ip" -p tcp -m multiport --dports 3000,8080
+for ip in 10.66.0.10 10.66.0.21 10.66.0.22 10.66.0.31 10.66.0.32; do
+  ensure_accept -i wg0 -s "$ip" -p tcp -m multiport --dports 3000,8088
 done
 
 if [[ "$ENABLE_PHASE7" == "1" ]]; then
@@ -44,16 +44,16 @@ if [[ "$ENABLE_PHASE7" == "1" ]]; then
     ensure_accept -i wg0 -s "$ip" -p tcp --dport 8883
   done
   # Member laptops and four separately enrolled phones use the backend API.
-  for ip in 10.66.0.11 10.66.0.12 10.66.0.13 10.66.0.14 10.66.0.21 10.66.0.22 10.66.0.23 10.66.0.24; do
-    ensure_accept -i wg0 -s "$ip" -p tcp --dport 8000
+  for ip in 10.66.0.10 10.66.0.12 10.66.0.13 10.66.0.14 10.66.0.21 10.66.0.22 10.66.0.23 10.66.0.24; do
+    ensure_accept -i wg0 -s "$ip" -p tcp --dport 8100
   done
 else
   # Re-running with Phase 7 disabled also retracts its previously installed rules.
   for ip in 10.66.0.16 10.66.0.41 10.66.0.42; do
     remove_accept -i wg0 -s "$ip" -p tcp --dport 8883
   done
-  for ip in 10.66.0.11 10.66.0.12 10.66.0.13 10.66.0.14 10.66.0.21 10.66.0.22 10.66.0.23 10.66.0.24; do
-    remove_accept -i wg0 -s "$ip" -p tcp --dport 8000
+  for ip in 10.66.0.10 10.66.0.12 10.66.0.13 10.66.0.14 10.66.0.21 10.66.0.22 10.66.0.23 10.66.0.24; do
+    remove_accept -i wg0 -s "$ip" -p tcp --dport 8100
   done
 fi
 
