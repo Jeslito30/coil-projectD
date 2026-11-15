@@ -15,7 +15,7 @@ Store passwords/tokens in environment variables, never in commands saved to Git 
 ```bash
 export INFLUX_TOKEN=<read-token>
 python tests/delay/analyze_delay.py \
-  --bucket coil --org coil --start -1h --scenario normal
+  --bucket sensors --org coil --start -1h --scenario normal
 ```
 
 Use separate, recorded time windows/scenarios for normal operation and recovery traffic. Record clock offsets with `vpn/ntp/chrony-check.sh` before and after the run.
