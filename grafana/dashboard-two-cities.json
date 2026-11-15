@@ -399,7 +399,7 @@
             "type": "influxdb",
             "uid": "coil-influx"
           },
-          "query": "from(bucket: \"sensors\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"environment\" and r._field == \"value\")\n  |> group(columns: [\"sensor_id\", \"city\", \"sensor_type\"])\n  |> last()\n  |> map(fn: (r) => ({city: r.city, sensor_id: r.sensor_id, type: r.sensor_type, value: r._value,\n                      age_s: float(v: int(v: now()) - int(v: r._time)) / 1000000000.0}))\n  |> group()\n  |> sort(columns: [\"sensor_id\"])",
+          "query": "from(bucket: \"sensors\")\n  |> range(start: -30d)\n  |> filter(fn: (r) => r._measurement == \"environment\" and r._field == \"value\")\n  |> group(columns: [\"sensor_id\", \"city\", \"sensor_type\"])\n  |> last()\n  |> map(fn: (r) => ({city: r.city, sensor_id: r.sensor_id, type: r.sensor_type, value: r._value,\n                      age_s: float(v: int(v: now()) - int(v: r._time)) / 1000000000.0}))\n  |> group()\n  |> sort(columns: [\"sensor_id\"])",
           "refId": "A"
         }
       ],
