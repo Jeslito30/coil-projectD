@@ -259,7 +259,13 @@ class Simulator:
         self.ca_file = broker.get("ca_file")
         self.keepalive = int(broker.get("keepalive", 30))
         self.queue_limit = int(config.get("queue_limit", 2000))
-        self.interval = float(args.interval or config.get("interval_seconds", 30))
+        if self.queue_limit <= 0:
+            raise SystemExit("queue_limit must be positive (zero would be unlimited in paho)")
+        if args.anomaly_count < 1:
+            raise SystemExit("--anomaly-count must be at least 1")
+        if args.silence_for < 0 or args.count < 0:
+            raise SystemExit("--silence-for and --count must be non-negative")
+        self.interval = float(args.interval if args.interval is not None else config.get("interval_seconds", 30))
         if self.interval <= 0:
             raise SystemExit("interval must be positive")
         self.rng = random.Random(args.seed)
@@ -283,7 +289,7 @@ class Simulator:
             seen.add(sensor_id)
             state = SensorState(sensor_id, sensor_type, RandomWalk(self.city, sensor_type, self.rng))
             if sensor_id in self.args.anomaly:
-                state.anomalies_left = max(1, self.args.anomaly_count)
+                state.anomalies_left = self.args.anomaly_count
             if sensor_id in self.args.silence:
                 state.silence_after = max(0, self.args.silence_after)
             sensors.append(state)
@@ -419,7 +425,11 @@ class Simulator:
                         if info.mid in state.early_acks:
                             # Acknowledged before we got here: count it as delivered immediately.
                             state.early_acks.discard(info.mid)
+                            resumed = state.awaiting_resume
                             state.awaiting_resume = False
+                            if resumed:
+                                self.log.write("publish_resumed", sensor_id=state.sensor_id, pending=state.pending)
+                            self.log.write("puback", sensor_id=state.sensor_id, mid=info.mid, pending=state.pending)
                         else:
                             state.pending_mids.add(info.mid)
                             state.pending += 1
