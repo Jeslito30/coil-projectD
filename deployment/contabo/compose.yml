@@ -76,6 +76,7 @@ services:
       GF_SMTP_FROM_NAME: Project D
       GF_SMTP_USER: ${GF_SMTP_USER:-}
       GF_SMTP_PASSWORD: ${GF_SMTP_PASSWORD:-}
+      GRAFANA_ALERT_EMAIL: ${GRAFANA_ALERT_EMAIL:?set GRAFANA_ALERT_EMAIL in .env}
       INFLUX_URL: http://influxdb:8086
       INFLUX_ORG: ${INFLUX_ORG:-coil}
       INFLUX_TOKEN: ${INFLUX_TOKEN:?set INFLUX_TOKEN in .env}
@@ -84,6 +85,7 @@ services:
       - ../../grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
       - ../../grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
       - ../../grafana/provisioning/alerting:/etc/grafana/provisioning/alerting:ro
+      - ../../grafana/alert-rules.yaml:/etc/grafana/provisioning/alerting/alert-rules.yaml:ro
       - ../../grafana/dashboard-two-cities.json:/var/lib/grafana/dashboards/project-d-two-cities.json:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/health | grep -q ok"]
