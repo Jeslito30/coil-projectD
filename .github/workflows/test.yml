@@ -1,0 +1,69 @@
+name: Offline tests and configuration checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install YAML parser
+        run: python -m pip install PyYAML==6.0.2
+
+      - name: Run simulator contract tests
+        run: python -m unittest discover -s simulators/tests -v
+
+      - name: Compile Python sources
+        run: python -m compileall -q simulators tests
+
+      - name: Validate JSON and YAML files
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import yaml
+
+          json_files = sorted(Path('.').rglob('*.json'))
+          yaml_files = sorted({
+              *Path('deployment').rglob('*.yml'),
+              *Path('deployment').rglob('*.yaml'),
+              *Path('grafana').rglob('*.yml'),
+              *Path('grafana').rglob('*.yaml'),
+          })
+          for path in json_files:
+              with path.open(encoding='utf-8') as handle:
+                  json.load(handle)
+              print(f'JSON OK: {path}')
+          for path in yaml_files:
+              with path.open(encoding='utf-8') as handle:
+                  list(yaml.safe_load_all(handle))
+              print(f'YAML OK: {path}')
+          if not json_files or not yaml_files:
+              raise SystemExit('Expected configuration files were not found')
+          PY
+
+      - name: Check shell script syntax
+        run: git ls-files -z '*.sh' | xargs -0 -n1 bash -n
+
+      - name: Validate Compose configuration without starting services
+        env:
+          INFLUX_ADMIN_USER: ci
+          INFLUX_ADMIN_PASSWORD: ci-test-only
+          INFLUX_TOKEN: ci-test-only
+          MQTT_TELEGRAF_PASSWORD: ci-test-only
+          GRAFANA_ADMIN_PASSWORD: ci-test-only
+          GRAFANA_ALERT_EMAIL: ci@example.invalid
+        run: docker compose -f deployment/contabo/compose.yml config -q
