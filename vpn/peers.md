@@ -12,25 +12,34 @@ Reserved addresses are not active peers. Add a public key and enrolment date onl
 | Server public key | `DQUHsmYKM1uRkt6emmTbVfrx5uSAH5BISvLAuLkUlmA=` (posted by Jeslito, 13 Nov 2026) |
 | Endpoint | Sent privately by the server admin; not stored in this public repository |
 
-## Peers
+## Active peers
+
+The mappings below match the server enrolment and `wg show` output reviewed on 14 Nov 2026. Public keys are identifiers, not secrets.
 
 | Peer | Device / custodian | VPN IP | Public key | Added (UTC) | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| `ph-member-1` | PH laptop — Jeslito | `10.66.0.11` | — | — | Key requested | Core member access |
-| `ph-member-2` | PH laptop — Lea | `10.66.0.12` | — | — | Key requested | Core member access |
-| `ph-phone-1` | PH phone 1 — custodian TBD | `10.66.0.13` | — | — | Phase 7 reserved | Backend only; separate profile |
-| `ph-phone-2` | PH phone 2 — custodian TBD | `10.66.0.14` | — | — | Phase 7 reserved | Backend only; separate profile |
-| `mati-sim` | Mati simulator host | `10.66.0.15` | — | — | Reserved | Leave unused if simulator uses a member laptop |
-| `mati-monitor` | Mati monitored computer | `10.66.0.16` | — | — | Phase 7 reserved | Monitoring agent |
-| `pl-member-1` | PL computer — Darek | `10.66.0.21` | `XCUOQAGSdXSNAean5wy9psXdg1Vb4kl4bZo/+UbI8WE=` | — | Key received — awaiting server enrolment | Core member access; also runs the Szczecin simulator |
-| `pl-member-2` | PL laptop — Mykyta | `10.66.0.22` | `ywsxkPjLONDKGGnZFMnnrrd0lnw6sDJPGcwqFcwFmBE=` | — | Key received — awaiting server enrolment | Key posted 12 Nov 2026 |
-| `pl-phone-1` | PL phone 1 — custodian TBD | `10.66.0.23` | — | — | Phase 7 reserved | Backend only; separate profile |
-| `pl-phone-2` | PL phone 2 — custodian TBD | `10.66.0.24` | — | — | Phase 7 reserved | Backend only; separate profile |
-| `szcz-sim` | Szczecin simulator host | `10.66.0.25` | — | — | Not used | Simulator runs on `pl-member-1` (10.66.0.21) |
-| `faculty-dorsu` | DOrSU faculty device | `10.66.0.31` | — | — | Reserved | Dashboard viewer |
-| `faculty-pm` | PM Szczecin faculty device | `10.66.0.32` | — | — | Reserved | Dashboard viewer |
-| `pl-wol-relay` | Szczecin demonstration relay | `10.66.0.41` | — | — | Phase 7 reserved | A Mati deployment needs a separate relay/allocation |
-| `szcz-monitor` | Szczecin monitored computer | `10.66.0.42` | — | — | Phase 7 reserved | Monitoring agent |
+| `ph-member-1` | PH laptop — Jeslito | `10.66.0.10` | `nHfsvPbYsyS4jWI7NTCkH7v8rfXWPXQ/rlz0oUsUnkM=` | 2026-11-14 | Active | Core member access; key and handshake confirmed |
+| `pl-member-2` | PL laptop — Mykyta | `10.66.0.21` | `ywsxkPjLONDKGGnZFMnnrrd0lnw6sDJPGcwqFcwFmBE=` | 2026-11-13 | Active | Core member access; key and handshake confirmed |
+| `pl-member-1` | PL computer — Darek | `10.66.0.22` | `XCUOQAGSdXSNAean5wy9psXdg1Vb4kl4bZo/+UbI8WE=` | 2026-11-14 | Active | Also runs the Szczecin simulator |
+
+## Reserved addresses
+
+| Peer | Device / custodian | VPN IP | Status | Notes |
+| --- | --- | --- | --- | --- |
+| `ph-member-2` | PH laptop — Lea | `10.66.0.12` | On hold | Laptop damaged; generate a new key pair on the replacement device |
+| `ph-phone-1` | PH phone 1 — custodian TBD | `10.66.0.13` | Phase 7 reserved | Backend only; separate profile |
+| `ph-phone-2` | PH phone 2 — custodian TBD | `10.66.0.14` | Phase 7 reserved | Backend only; separate profile |
+| `mati-sim` | Mati simulator host | `10.66.0.15` | Reserved | Leave unused if simulator uses a member laptop |
+| `mati-monitor` | Mati monitored computer | `10.66.0.16` | Phase 7 reserved | Monitoring agent |
+| `pl-phone-1` | PL phone 1 — custodian TBD | `10.66.0.23` | Phase 7 reserved | Backend only; separate profile |
+| `pl-phone-2` | PL phone 2 — custodian TBD | `10.66.0.24` | Phase 7 reserved | Backend only; separate profile |
+| `szcz-sim` | Szczecin simulator host | `10.66.0.25` | Not used | Simulator runs on `pl-member-1` (`10.66.0.22`) |
+| `faculty-dorsu` | DOrSU faculty device | `10.66.0.31` | Reserved | Dashboard viewer |
+| `faculty-pm` | PM Szczecin faculty device | `10.66.0.32` | Reserved | Dashboard viewer |
+| `pl-wol-relay` | Szczecin demonstration relay | `10.66.0.41` | Phase 7 reserved | A Mati deployment needs a separate relay/allocation |
+| `szcz-monitor` | Szczecin monitored computer | `10.66.0.42` | Phase 7 reserved | Monitoring agent |
+
+`10.66.0.11` is intentionally unassigned: Jeslito's enrolled peer is `10.66.0.10`. Do not reuse active addresses without first revoking the old peer.
 
 ## Enrolment record requirements
 
