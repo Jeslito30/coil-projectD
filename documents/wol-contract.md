@@ -73,7 +73,7 @@ Why: `expires_at_utc` stops a command queued during an outage from waking a comp
 
 ## 6. Result messages (`.../result`)
 
-The relay publishes progress messages and exactly **one final** message per `request_id`.
+The relay publishes progress messages and records exactly **one final outcome** per `request_id`. QoS 1 retransmissions repeat the identical final result; they never execute the command again.
 
 ```json
 {"schema_version":1,"request_id":"6f1c2a4e-8d3b-4f7a-9c61-2b5e0d9a7f13","relay_id":"pl-wol-relay","target_id":"SZCZ-PC-01","state":"reachable","final":true,"reason":null,"packet_sent_at_utc":"2026-11-25T08:30:00.410Z","reachable_at_utc":"2026-11-25T08:30:41.902Z","wake_seconds":41.5,"check":"icmp","timestamp_utc":"2026-11-25T08:30:41.905Z"}
@@ -92,7 +92,6 @@ The relay publishes progress messages and exactly **one final** message per `req
 | --- | --- |
 | `unknown_target` | `target_id` is not in the allowlist |
 | `expired` | Received after `expires_at_utc` |
-| `duplicate` | `request_id` already processed (QoS 1 redelivery); the relay re-publishes the earlier final result instead |
 | `rate_limited` | Same target woken less than 60 s ago |
 | `malformed` | Invalid JSON, fields or types |
 | `unsupported_action` | `action` other than `wake` |
@@ -115,11 +114,11 @@ The relay publishes progress messages and exactly **one final** message per `req
 ## 7. Relay behaviour
 
 1. Subscribe to `.../cmd` with QoS 1; publish retained `online` on connect, Last Will `offline`.
-2. Validate the command (section 5). Reject in this order: `malformed`, `unsupported_action`, `expired`, `duplicate`, `unknown_target`, `rate_limited`.
+2. Look up `request_id` before execution. If a final result is stored, re-publish that identical result and stop. If the request is still in progress, do not start a second operation. Otherwise validate a new command (section 5) and reject in this order: `malformed`, `unsupported_action`, `expired`, `unknown_target`, `rate_limited`.
 3. Publish `accepted`. If the target already answers the check, publish `already_on` and stop.
 4. Send the magic packet (6 × `FF` + 16 × target MAC) as UDP broadcast to `255.255.255.255:9`, 3 times, 1 s apart. Publish `packet_sent`.
 5. Check reachability every 5 s for up to 180 s. Publish `reachable` or `unreachable_timeout`.
-6. Keep processed `request_id`s for 24 h (duplicate detection) and the last wake time per target (rate limit).
+6. Keep processed `request_id`s and their final results in persistent storage for at least 24 h, so duplicate detection survives relay restarts. Also persist the last wake time per target for rate limiting.
 7. Process one command per target at a time; a second command for a busy target is `rate_limited`.
 8. Log every command and result locally with timestamps (audit log for evidence).
 
