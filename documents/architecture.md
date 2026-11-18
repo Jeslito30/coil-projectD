@@ -28,7 +28,7 @@ Wake-on-LAN and remote computer monitoring are Phase 7 work. They MUST NOT delay
 ```mermaid
 flowchart TB
     subgraph MATI["Mati, Philippines"]
-        PH["PH members<br/>VPN 10.66.0.11 · .12"]
+        PH["PH members<br/>VPN 10.66.0.10 · .12"]
         MS["Mati simulator<br/>MATI-TEMP-01<br/>MATI-HUM-01<br/>MATI-AIR-01<br/>VPN 10.66.0.15"]
     end
 

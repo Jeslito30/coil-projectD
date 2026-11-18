@@ -50,11 +50,11 @@ Core services listen on `10.66.0.1` or only on the internal Docker network. A VP
 | Service | Port | Listens on | Allowed VPN sources |
 | --- | --- | --- | --- |
 | WireGuard | `51820/udp` | Public interface | Internet; peer authentication still required |
-| SSH | `22/tcp` | Server SSH interface, restricted by firewall | `.11`, `.12`, `.21`, `.22` |
-| MQTT over TLS | `8883/tcp` | `10.66.0.1` | `.11`, `.12`, `.15`, `.21`, `.22`, `.25`; add `.16`, `.41` / `.42` only when their Phase 7 roles require it |
+| SSH | `22/tcp` | Server SSH interface, restricted by firewall | `.10`, `.12`, `.21`, `.22` |
+| MQTT over TLS | `8883/tcp` | `10.66.0.1` | `.10`, `.21`, `.22` (active); add `.12`, `.15` or `.25` only after that peer is enrolled; add `.16`, `.41` / `.42` only when their Phase 7 roles require it |
 | Grafana | `3000/tcp` | `10.66.0.1` | `.10`, `.21`, `.22`, `.31`, `.32` |
 | Team dashboard | `8088/tcp` | `10.66.0.1` | `.10`, `.21`, `.22`, `.31`, `.32` |
-| Backend API — **Phase 7 extension** | `8100/tcp` | `10.66.0.1` | `.11`, `.12`, `.13`, `.14`, `.21`, `.22`, `.23`, `.24`; JWT authentication still required |
+| Backend API — **Phase 7 extension** | `8100/tcp` | `10.66.0.1` | `.10`, `.12`, `.13`, `.14`, `.21`, `.22`, `.23`, `.24`; JWT authentication still required |
 | InfluxDB | `8086/tcp` | Docker internal network only | Telegraf and Grafana containers; no VPN or host binding |
 | MQTT plaintext | `1883/tcp` | **Not enabled anywhere** | None |
 | Restic backup | No listening port | Outbound from the server to the approved repository | Not a VPN client service |
@@ -133,30 +133,21 @@ Do **not** restrict `sshd` with `ListenAddress 10.66.0.1` as part of this plan. 
 
 ### 4.4 Container rules: `DOCKER-USER`
 
-For Docker-published ports (`8883`, `3000`, `8088`, and Phase 7 `8100`), enforce source restrictions in the `DOCKER-USER` chain. The following is a minimal policy fragment for a dedicated server; integrate it into the reviewed firewall script rather than repeatedly pasting it into a live terminal:
+For Docker-published ports (`8883`, `3000`, `8088`, and Phase 7 `8100`), enforce source restrictions through the `DOCKER-USER` chain using `vpn/firewall/docker-user.sh`. Do not paste rules by hand.
 
-```bash
-# Return traffic first. The production script must avoid duplicate entries.
-sudo iptables -I DOCKER-USER -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+The script keeps all Project D rules in a dedicated chain, `PROJECTD-WG`, and inserts a single jump at the top of `DOCKER-USER`:
 
-# MQTT: members and simulator hosts.
-for ip in 10.66.0.10 10.66.0.21 10.66.0.22; do
-  sudo iptables -A DOCKER-USER -i wg0 -s "$ip" -p tcp --dport 8883 -j ACCEPT
-done
-
-# Grafana and team dashboard: members and faculty.
-for ip in 10.66.0.10 10.66.0.21 10.66.0.22 10.66.0.31 10.66.0.32; do
-  sudo iptables -A DOCKER-USER -i wg0 -s "$ip" -p tcp -m multiport --dports 3000,8088 -j ACCEPT
-done
-
-# Phase 7 only — backend: member laptops and individually enrolled phones.
-# for ip in 10.66.0.10 10.66.0.12 10.66.0.13 10.66.0.14 10.66.0.21 10.66.0.22 10.66.0.23 10.66.0.24; do
-#   sudo iptables -A DOCKER-USER -i wg0 -s "$ip" -p tcp --dport 8100 -j ACCEPT
-# done
-
-# Deny other VPN-originated traffic to forwarded container ports.
-sudo iptables -A DOCKER-USER -i wg0 -j DROP
+```text
+DOCKER-USER:  -i wg0 -j PROJECTD-WG        (position 1)
+              ... Docker's own rules, possibly ending with -j RETURN
+PROJECTD-WG:  RELATED,ESTABLISHED -> RETURN
+              allowed source + port -> RETURN   (one rule per allow-list entry)
+              everything else -> DROP
 ```
+
+Do **not** append a `DROP` to `DOCKER-USER` (`iptables -A DOCKER-USER -i wg0 -j DROP`). On Docker versions where `DOCKER-USER` ends with `-j RETURN`, an appended rule is never evaluated and every VPN peer reaches every published port. `tests/security/firewall-netns-test.sh` reproduces this failure with real packets and checks the replacement design (27 checks; no Docker or WireGuard needed).
+
+Allowed traffic returns to `DOCKER-USER` instead of being accepted there, so Docker's own isolation rules still run. `docker-user.sh --check` compares the installed rules with the reviewed allow list; `--remove` is the rollback.
 
 Host and container ports are identical in this plan. If Compose changes a container-side port, review the actual post-DNAT rule rather than assuming the host port still matches.
 
