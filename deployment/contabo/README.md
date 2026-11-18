@@ -10,6 +10,30 @@ This compose stack runs Mosquitto (MQTT TLS), Telegraf, InfluxDB 2.x and Grafana
 - InfluxDB organisation: `coil`; bucket: `sensors`; retention: **30 days** (`720h`). Alert 2 and the latest-readings table use the same 30-day lookback.
 - The host also runs unrelated services. Do not apply a broad default-deny UFW script. Review and apply only `vpn/firewall/docker-user.sh` after peers are enrolled.
 
+## 0. Adopting an existing deployment
+
+A Project D stack is already running on Contabo. **Do not run `docker compose up` from this repository on that host until this section is complete.** Compose names volumes after the project (`coil-projectd_influxdb-data`, ...). If the running stack uses another project name or anonymous volumes, `up` starts a second, empty stack instead of reusing the data, and the two stacks conflict on ports.
+
+1. Run the read-only check and keep the report with the evidence (it prints no secrets):
+
+   ```bash
+   sudo python3 deployment/contabo/reconcile_check.py --env-file deployment/contabo/.env > reconcile-$(date -u +%F).md
+   ```
+
+   It lists, per service, the running project, image, data mount and published ports against `compose.yml`, plus `10.66.0.1`, `wg0` and the first `DOCKER-USER` rule. Exit status 1 means at least one **HIGH** finding.
+
+2. Resolve every HIGH finding before switching. For data on another volume name, take a verified backup (`backup/README.md`), stop the old stack, and copy each data volume into the name the repository expects, for example:
+
+   ```bash
+   docker volume create coil-projectd_influxdb-data
+   docker run --rm --entrypoint sh -v <old-influx-volume>:/from:ro -v coil-projectd_influxdb-data:/to \
+     influxdb:2.7.12 -c 'cp -a /from/. /to/'
+   ```
+
+   Repeat for Grafana (`/var/lib/grafana`) and Mosquitto (`/mosquitto/data`). Keep the old volumes until the acceptance checks in section 5 pass on the new stack; that is the rollback.
+
+3. Re-run the check. Only an empty findings list (or reviewed INFO/MEDIUM items) clears the switch.
+
 ## 1. Prepare the host
 
 Install Docker Engine with the Compose plugin, WireGuard and an NTP client. Configure `wg0` as `10.66.0.1/24`, enrol only the public keys in `vpn/peers.md`, and verify clock synchronisation before measuring delay.
@@ -60,9 +84,30 @@ python tests/security/mqtt_security_test.py --help
 docker compose -f deployment/contabo/compose.yml logs --since=10m telegraf
 ```
 
-In Grafana, open **Project D - Mati + Szczecin** and confirm six sensors, shared charts, latest values and ages. Use `--anomaly <sensor_id>` and `--silence <sensor_id>` to verify both alert rules and recovery. Email delivery is a separate acceptance test: set `GF_SMTP_ENABLED=true`, supply SMTP settings, restart Grafana and use **Contact points → Test**. Do not claim email delivery merely because an alert fired.
+In Grafana, open **Project D - Mati + Szczecin** and confirm six sensors, shared charts, latest values and ages. Use `--anomaly <sensor_id>` and `--silence <sensor_id>` to verify both alert rules and recovery.
 
-Create named faculty **Viewer** accounts through Grafana Administration. Do not share the administrator account and do not enable anonymous access.
+### Email delivery
+
+Email is a separate acceptance test. Set `GF_SMTP_ENABLED=true` and the `GF_SMTP_*` values in `.env`, recreate Grafana (`up -d grafana`), then test in two steps so a failure points at one layer:
+
+```bash
+python3 grafana/smtp_test.py direct  --env-file deployment/contabo/.env   # SMTP host, TLS, login, sender
+python3 grafana/smtp_test.py grafana --env-file deployment/contabo/.env   # Grafana's own SMTP settings
+```
+
+Then trigger Alert 1 and Alert 2 and keep the received emails (with headers) as evidence. Do not claim email delivery merely because an alert fired or a test message was sent.
+
+### Faculty Viewer accounts
+
+Keep the list outside Git (format: `grafana/viewers.csv.example`) and create or repair the accounts over loopback:
+
+```bash
+sudo install -m 600 grafana/viewers.csv.example /etc/projectd/viewers.csv && sudoedit /etc/projectd/viewers.csv
+python3 grafana/viewer_accounts.py --users /etc/projectd/viewers.csv --env-file deployment/contabo/.env --dry-run
+python3 grafana/viewer_accounts.py --users /etc/projectd/viewers.csv --env-file deployment/contabo/.env
+```
+
+Re-running is safe: existing users keep their password and their role is forced back to **Viewer**. New passwords go only to `grafana-viewer-passwords.txt` (mode 600); deliver them privately, ask for a change at first login, then delete the file. Viewers also need their VPN profile (`.31`, `.32`). Do not share the administrator account and do not enable anonymous access.
 
 ## 6. Firewall and persistence
 
@@ -71,13 +116,18 @@ After positive connectivity tests, review and apply the active-peer rules:
 ```bash
 sudo vpn/firewall/docker-user.sh
 sudo systemctl enable --now project-d-docker-user.service
+sudo vpn/firewall/docker-user.sh --check     # after every reboot and Docker upgrade
 ```
 
-Install the supplied systemd unit first if it is not already present. Verify allowed and denied sources, then repeat after reboot. The firewall currently allows only active member peers; reserved addresses require enrolment and a reviewed rule update.
+Install the supplied systemd unit first if it is not already present. Verify allowed and denied sources, then repeat after reboot. The firewall currently allows only active member peers; reserved addresses require enrolment and a reviewed rule update. `--remove` rolls the rules back.
+
+The rules live in a dedicated `PROJECTD-WG` chain reached from the first `DOCKER-USER` rule. The previous version appended its DROP to `DOCKER-USER`, where a trailing `-j RETURN` (present on many Docker versions) made it ineffective; re-running the current script removes those old rules. `sudo tests/security/firewall-netns-test.sh` checks the script offline with real packets.
+
+The rules only filter traffic arriving on `wg0`. Unrelated services on this host (Coolify, Supabase) are not reachable from VPN peers through Docker-published ports while the rules are active.
 
 ## 7. Backup and restore
 
-Configure the encrypted, off-server Restic repository described in `backup/README.md`. Run and check a backup, enable the nightly timer, and perform the fresh-VM exercise in `tests/restore/restore-log.md`. Repository files alone are not evidence of a successful backup or restore.
+Configure the encrypted, off-server Restic repository described in `backup/README.md`. Run and check a backup, enable the nightly timer, and perform the fresh-VM exercise in `tests/restore/restore-log.md`. `tests/restore/inventory.py` produces the per-sensor data comparison for that log. Repository files alone are not evidence of a successful backup or restore.
 
 ## 8. Updates and rollback
 
