@@ -84,6 +84,30 @@ done
   -v "$SNAPSHOT_ROOT/mosquitto-data:/restore:ro" --entrypoint sh mosquitto \
   -c 'rm -rf /mosquitto/data/* && cp -a /restore/. /mosquitto/data/'
 
+# The WireGuard configuration is restored next to the project but never activated automatically:
+# bringing up a second server with the production key must be a deliberate decision.
+if [[ -d "$SNAPSHOT_ROOT/wireguard" ]]; then
+  install -d -m 700 "$DEST/wireguard-restored"
+  cp -a "$SNAPSHOT_ROOT/wireguard/." "$DEST/wireguard-restored/"
+  chmod -R go-rwx "$DEST/wireguard-restored"
+  echo "WireGuard configuration restored to $DEST/wireguard-restored (not installed)."
+else
+  echo "WARNING: snapshot has no WireGuard configuration; peers will need new profiles for this server." >&2
+fi
+
+# MQTT and Grafana publish on 10.66.0.1. Without that address Docker cannot bind the ports.
+if ! ip -4 -o addr show 2>/dev/null | grep -q ' 10\.66\.0\.1/'; then
+  cat >&2 <<MSG
+Data volumes are restored, but 10.66.0.1 is not configured on this VM, so the full stack cannot bind its ports.
+Either install the restored WireGuard configuration (isolated test network only):
+  install -m 600 $DEST/wireguard-restored/wg0.conf /etc/wireguard/wg0.conf && systemctl enable --now wg-quick@wg0
+or, for an isolated drill without VPN clients, add the address to loopback (removed at reboot):
+  ip addr add 10.66.0.1/32 dev lo
+Then run: ${COMPOSE[*]} up -d
+MSG
+  exit 3
+fi
+
 "${COMPOSE[@]}" up -d
 "${COMPOSE[@]}" ps
 

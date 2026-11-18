@@ -57,6 +57,16 @@ STOPPED=0
 for path in backup deployment docker documents grafana simulators tests vpn; do
   [[ ! -e "$ROOT/$path" ]] || cp -a "$ROOT/$path" "$STAGING/project/"
 done
+
+# The WireGuard server key is part of the service identity: without it a restored server gets a new
+# public key and every peer profile must be re-issued. It stays inside the encrypted snapshot only.
+WG_CONFIG_DIR="${WG_CONFIG_DIR:-/etc/wireguard}"
+if [[ -r "$WG_CONFIG_DIR/wg0.conf" ]]; then
+  mkdir -p "$STAGING/wireguard"
+  cp -a "$WG_CONFIG_DIR/." "$STAGING/wireguard/"
+else
+  echo "WARNING: $WG_CONFIG_DIR/wg0.conf not readable; the snapshot will not contain the WireGuard server key." >&2
+fi
 {
   echo "created_utc=$(date -u +%FT%TZ)"
   if command -v git >/dev/null && git -C "$ROOT" rev-parse HEAD >/dev/null 2>&1; then
