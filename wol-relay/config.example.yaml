@@ -1,0 +1,22 @@
+# Project D Wake-on-LAN relay (Phase 7). Copy to config.yaml (git-ignored) on the relay device.
+# The allowlist below is the ONLY place MAC addresses are stored; commands carry target_id only.
+relay_id: pl-wol-relay
+city_topic: szczecin
+
+broker:
+  host: 10.66.0.1          # through WireGuard, relay peer 10.66.0.41
+  port: 8883
+  ca_file: ca.crt          # public project CA
+  keepalive: 30
+
+state_db: wol-relay-state.sqlite3      # processed request_ids (24 h) and last wake per target
+audit_log: wol-relay-audit.jsonl       # every command and result, for evidence
+wake_timeout_seconds: 180
+
+targets:
+  - target_id: SZCZ-PC-01
+    mac: "00:11:22:33:44:55"           # placeholder; use the target's wired NIC
+    ip: 192.168.1.50                   # fixed via DHCP reservation
+    check: icmp                        # or tcp:3389 / tcp:445 if ICMP is blocked by the target firewall
+    broadcast: 192.168.1.255           # LAN broadcast; 255.255.255.255 also works on most networks
+    owner: "approved by <name>, <date>"

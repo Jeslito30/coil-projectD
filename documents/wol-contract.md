@@ -1,7 +1,7 @@
 # Wake-on-LAN Relay — MQTT Contract (Phase 7, optional)
 
 **Owner:** Poland pair (relay side) · **Consumer:** Philippines pair (backend and Flutter app)
-**Status:** Draft v0.1 — awaiting review by both pairs
+**Status:** Draft v0.1 — awaiting review by both pairs · Relay implementation: [`wol-relay/`](../wol-relay/README.md) (tested, not deployed)
 **Scope:** Messages between the FastAPI backend and the Wake-on-LAN relay in the Szczecin LAN. The REST API between the Flutter app and the backend is defined by the PH pair; section 9 only lists what it needs from this contract.
 
 Phase 7 starts only after all required Project D deliverables work (Implementation Plan, priority 6).

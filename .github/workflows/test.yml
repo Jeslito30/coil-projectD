@@ -28,8 +28,11 @@ jobs:
       - name: Run Grafana tooling tests
         run: python -m unittest discover -s tests/grafana -v
 
+      - name: Run Wake-on-LAN relay tests
+        run: python -m unittest discover -s wol-relay/tests -v
+
       - name: Compile Python sources
-        run: python -m compileall -q simulators tests grafana deployment
+        run: python -m compileall -q simulators tests grafana deployment wol-relay
 
       - name: Validate JSON and YAML files
         run: |

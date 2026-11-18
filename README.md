@@ -28,6 +28,10 @@ These checks require no MQTT broker and do not prove that the deployed infrastru
 python -m unittest discover -s simulators/tests -v
 python simulators/projectd_simulator.py --city Szczecin --dry-run --count 1
 python simulators/projectd_simulator.py --city Mati --dry-run --count 1
+python -m unittest discover -s tests/grafana -v
+python -m unittest discover -s wol-relay/tests -v
+sudo tests/security/firewall-netns-test.sh          # firewall script, real packets in network namespaces
+sudo docker/mosquitto/scripts/local-test.sh          # broker TLS/ACL with a throw-away Mosquitto
 ```
 
 The GitHub Actions workflow additionally compiles Python sources, parses JSON/YAML, checks shell syntax and validates the Compose model using CI-only placeholder values.
@@ -43,12 +47,13 @@ The GitHub Actions workflow additionally compiles Python sources, parses JSON/YA
 | `vpn/` | WireGuard templates, peer registry and firewall rules |
 | `tests/` | Delay analysis and infrastructure acceptance-test templates |
 | `backup/` | Restic backup, systemd timer and guarded fresh-VM restore |
+| `wol-relay/` | Optional Phase 7 Wake-on-LAN relay (not deployed) |
 | `documents/` | Data design, architecture and implementation contracts |
 | `evidence/` | Real test output and screenshots; templates are not evidence |
 
 ## Scope and optional Phase 7
 
-The required baseline is MQTT → Telegraf → InfluxDB → Grafana. The custom FastAPI backend, Flutter application and Wake-on-LAN relay are optional Phase 7 work and are not needed to operate the baseline dashboard. See [backend/README.md](backend/README.md), [mobile/README.md](mobile/README.md) and the [WoL MQTT contract](documents/wol-contract.md). Draft contracts and placeholder directories must not be reported as completed implementations.
+The required baseline is MQTT → Telegraf → InfluxDB → Grafana. The custom FastAPI backend, Flutter application and Wake-on-LAN relay are optional Phase 7 work and are not needed to operate the baseline dashboard. The relay side is implemented and tested offline and against a local broker ([wol-relay/](wol-relay/README.md)), but it is not deployed and nothing sends it commands yet. The backend and app remain placeholders ([backend/README.md](backend/README.md), [mobile/README.md](mobile/README.md)); see the [WoL MQTT contract](documents/wol-contract.md). Placeholder directories must not be reported as completed implementations.
 
 ## Deployment status
 

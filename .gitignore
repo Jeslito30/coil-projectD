@@ -65,3 +65,8 @@ Thumbs.db
 # Grafana viewer list and generated passwords (grafana/viewer_accounts.py)
 grafana/viewers.csv
 grafana-viewer-passwords.txt
+
+# Wake-on-LAN relay local state (Phase 7)
+wol-relay/config.yaml
+wol-relay/*.sqlite3
+wol-relay/*.jsonl
