@@ -29,11 +29,11 @@ The network is hub-and-spoke. Every peer connects to the central cloud server; P
 | `10.66.0.14` | `ph-phone-2` | Filipino member 2 phone | Mobile backend access, Phase 7 only |
 | `10.66.0.15` | `mati-sim` | Device running the Mati simulator | Sensor publisher |
 | `10.66.0.16` | `mati-monitor` | Optional monitored computer in Mati | Computer monitoring, Phase 7 only |
-| `10.66.0.21` | `pl-member-2` | Mykyta laptop | Active member / Szczecin administration |
-| `10.66.0.22` | `pl-member-1` | Darek computer | Active member; also runs the Szczecin simulator |
+| `10.66.0.21` | `pl-member-2` | Mykyta laptop | Active member / Szczecin administration; runs the Szczecin simulator |
+| `10.66.0.22` | `pl-member-1` | Darek computer | Active member |
 | `10.66.0.23` | `pl-phone-1` | Polish member 1 phone | Mobile backend access, Phase 7 only |
 | `10.66.0.24` | `pl-phone-2` | Polish member 2 phone | Mobile backend access, Phase 7 only |
-| `10.66.0.25` | `szcz-sim` | Reserved separate simulator host | Not used; the simulator runs on `10.66.0.22` |
+| `10.66.0.25` | `szcz-sim` | Reserved separate simulator host | Not used; the simulator runs on Mykyta's laptop `10.66.0.21` |
 | `10.66.0.31` | `faculty-dorsu` | DOrSU faculty member | Dashboard viewer |
 | `10.66.0.32` | `faculty-pm` | Maritime University of Szczecin faculty member | Dashboard viewer |
 | `10.66.0.41` | `pl-wol-relay` | Optional WoL relay in Szczecin | WoL demonstration relay, Phase 7 only |

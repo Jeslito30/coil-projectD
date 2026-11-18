@@ -19,8 +19,8 @@ The mappings below match the server enrolment and `wg show` output reviewed on 1
 | Peer | Device / custodian | VPN IP | Public key | Added (UTC) | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | `ph-member-1` | PH laptop — Jeslito | `10.66.0.10` | `nHfsvPbYsyS4jWI7NTCkH7v8rfXWPXQ/rlz0oUsUnkM=` | 2026-11-14 | Active | Core member access; key and handshake confirmed |
-| `pl-member-2` | PL laptop — Mykyta | `10.66.0.21` | `ywsxkPjLONDKGGnZFMnnrrd0lnw6sDJPGcwqFcwFmBE=` | 2026-11-13 | Active | Core member access; key and handshake confirmed |
-| `pl-member-1` | PL computer — Darek | `10.66.0.22` | `XCUOQAGSdXSNAean5wy9psXdg1Vb4kl4bZo/+UbI8WE=` | 2026-11-14 | Active | Also runs the Szczecin simulator |
+| `pl-member-2` | PL laptop — Mykyta | `10.66.0.21` | `ywsxkPjLONDKGGnZFMnnrrd0lnw6sDJPGcwqFcwFmBE=` | 2026-11-13 | Active | Core member access; key and handshake confirmed; runs the Szczecin simulator (requested 17 Nov 2026 — confirm) |
+| `pl-member-1` | PL computer — Darek | `10.66.0.22` | `XCUOQAGSdXSNAean5wy9psXdg1Vb4kl4bZo/+UbI8WE=` | 2026-11-14 | Active | Core member access; must not start a second Szczecin simulator with the same sensor IDs |
 
 ## Reserved addresses
 
@@ -33,7 +33,7 @@ The mappings below match the server enrolment and `wg show` output reviewed on 1
 | `mati-monitor` | Mati monitored computer | `10.66.0.16` | Phase 7 reserved | Monitoring agent |
 | `pl-phone-1` | PL phone 1 — custodian TBD | `10.66.0.23` | Phase 7 reserved | Backend only; separate profile |
 | `pl-phone-2` | PL phone 2 — custodian TBD | `10.66.0.24` | Phase 7 reserved | Backend only; separate profile |
-| `szcz-sim` | Szczecin simulator host | `10.66.0.25` | Not used | Simulator runs on `pl-member-1` (`10.66.0.22`) |
+| `szcz-sim` | Szczecin simulator host | `10.66.0.25` | Not used | Simulator runs on `pl-member-2` (`10.66.0.21`) |
 | `faculty-dorsu` | DOrSU faculty device | `10.66.0.31` | Reserved | Dashboard viewer |
 | `faculty-pm` | PM Szczecin faculty device | `10.66.0.32` | Reserved | Dashboard viewer |
 | `pl-wol-relay` | Szczecin demonstration relay | `10.66.0.41` | Phase 7 reserved | A Mati deployment needs a separate relay/allocation |
