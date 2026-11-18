@@ -1,0 +1,5 @@
+# Copy outside Git (for example /etc/projectd/viewers.csv) and list read-only Grafana users.
+# Faculty get Viewer accounts and VPN profiles .31/.32 (documents/vpn-plan.md); they get no SSH or MQTT access.
+login,email,name
+faculty-dorsu,dorsu.faculty@example.org,DOrSU faculty
+faculty-pm,pm.faculty@example.org,PM Szczecin faculty

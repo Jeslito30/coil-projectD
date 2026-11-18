@@ -61,3 +61,7 @@ mobile/**/.flutter-plugins*
 .idea/
 .DS_Store
 Thumbs.db
+
+# Grafana viewer list and generated passwords (grafana/viewer_accounts.py)
+grafana/viewers.csv
+grafana-viewer-passwords.txt
