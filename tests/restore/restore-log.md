@@ -30,6 +30,22 @@
 | | Compose stack started | | |
 | | Validation finished | | |
 
+## Data inventory (before / after)
+
+Right after the source backup, record a fixed window and keep both CSV files with this log:
+
+```bash
+python3 tests/restore/inventory.py snapshot --stop <backup-time-UTC> > tests/restore/results/inventory-source.csv   # source server
+python3 tests/restore/inventory.py snapshot --stop <backup-time-UTC> > tests/restore/results/inventory-restored.csv # restored VM
+python3 tests/restore/inventory.py compare tests/restore/results/inventory-source.csv tests/restore/results/inventory-restored.csv
+```
+
+| Item | Value |
+| --- | --- |
+| Window (`--start` .. `--stop`) | |
+| Sensors identical (from `compare`) | __ of 6 |
+| Cities present after restore | |
+
 ## Acceptance checks
 
 | Check | Expected | Observed / evidence | Pass? |

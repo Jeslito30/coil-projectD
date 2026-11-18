@@ -25,8 +25,11 @@ jobs:
       - name: Run simulator contract tests
         run: python -m unittest discover -s simulators/tests -v
 
+      - name: Run Grafana tooling tests
+        run: python -m unittest discover -s tests/grafana -v
+
       - name: Compile Python sources
-        run: python -m compileall -q simulators tests
+        run: python -m compileall -q simulators tests grafana deployment
 
       - name: Validate JSON and YAML files
         run: |
@@ -57,12 +60,17 @@ jobs:
       - name: Check shell script syntax
         run: git ls-files -z '*.sh' | xargs -0 -n1 bash -n
 
+      - name: Test the VPN firewall script with real packets (network namespaces)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq socat iproute2
+          sudo tests/security/firewall-netns-test.sh
+
       - name: Validate Compose configuration without starting services
-        env:
-          INFLUX_ADMIN_USER: ci
-          INFLUX_ADMIN_PASSWORD: ci-test-only
-          INFLUX_TOKEN: ci-test-only
-          MQTT_TELEGRAF_PASSWORD: ci-test-only
-          GRAFANA_ADMIN_PASSWORD: ci-test-only
-          GRAFANA_ALERT_EMAIL: ci@example.invalid
-        run: docker compose -f deployment/contabo/compose.yml config -q
+        # Throw-away random values generated per run, so no credential-looking literal is stored in Git.
+        run: |
+          for name in INFLUX_ADMIN_PASSWORD INFLUX_TOKEN MQTT_TELEGRAF_PASSWORD GRAFANA_ADMIN_PASSWORD; do
+            export "$name=$(openssl rand -hex 16)"
+          done
+          export INFLUX_ADMIN_USER=ci GRAFANA_ALERT_EMAIL=ci@example.invalid
+          docker compose -f deployment/contabo/compose.yml config -q
