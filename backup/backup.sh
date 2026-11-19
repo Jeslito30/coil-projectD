@@ -77,7 +77,14 @@ fi
 
 echo "[$(date -u +%FT%TZ)] Uploading encrypted snapshot"
 restic backup "$STAGING" --tag project-d --tag automated
-restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 3 --prune
+# With an append-only repository (rest-server --append-only, or a cloud key without delete rights) the
+# server cannot delete snapshots, so a compromised host cannot destroy its own backups. Set
+# RESTIC_APPEND_ONLY=1 in restic.env and run the retention below from a separate trusted machine.
+if [[ "${RESTIC_APPEND_ONLY:-0}" == "1" ]]; then
+  echo "RESTIC_APPEND_ONLY=1: skipping forget/prune on this host; run retention from a trusted machine."
+else
+  restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 3 --prune
+fi
 restic snapshots --latest 1
 
 echo "[$(date -u +%FT%TZ)] Backup complete; snapshot verified by a successful upload"

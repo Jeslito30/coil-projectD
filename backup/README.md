@@ -15,7 +15,9 @@ chmod 600 /etc/projectd/restic.env
 $EDITOR /etc/projectd/restic.env
 ```
 
-Set `RESTIC_REPOSITORY` to an off-server location and generate a unique `RESTIC_PASSWORD` locally. Add only the credentials required by the selected backend. Never commit the completed file.
+Set `RESTIC_REPOSITORY` to an off-server location and generate a unique `RESTIC_PASSWORD` locally.
+
+Prefer a repository the server can only **append** to (`rest-server --append-only`, or a cloud key without delete rights) and set `RESTIC_APPEND_ONLY=1`. Root on the server can otherwise run `restic forget` and delete every snapshot. That matters while the host also runs other internet-facing services. Retention (`forget --prune`) then runs from a separate trusted machine. Add only the credentials required by the selected backend. Never commit the completed file.
 
 Initialize the repository once and verify access:
 
