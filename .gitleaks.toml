@@ -1,0 +1,11 @@
+# gitleaks configuration for the CI tree scan (.github/workflows/test.yml).
+# Default rules stay on; the only exception is a KEY= line with an EMPTY value. Templates such as
+# deployment/contabo/.env.example list required variables without values, and the generic rule can
+# match across such a line. Any line that actually holds a value is still scanned.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Empty KEY= assignments in templates"
+regexTarget = "line"
+regexes = ['''^[A-Z][A-Z0-9_]*=\s*$''']
