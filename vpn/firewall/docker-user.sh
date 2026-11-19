@@ -45,23 +45,24 @@ DASHBOARD_PEERS=(10.66.0.10 10.66.0.21 10.66.0.22 10.66.0.31 10.66.0.32) # membe
 PHASE7_MQTT_PEERS=(10.66.0.16 10.66.0.41 10.66.0.42)                  # monitoring agents, WoL relay
 PHASE7_API_PEERS=(10.66.0.10 10.66.0.12 10.66.0.13 10.66.0.14 10.66.0.21 10.66.0.22 10.66.0.23 10.66.0.24)
 
+# Ports are matched on the ORIGINAL destination port (the published host port) through conntrack.
+# DOCKER-USER sees packets after Docker's DNAT, so a plain --dport would match the container port
+# and silently follow any change to a "host:container" mapping in compose.yml.
+port_rule() {  # port_rule SOURCE_IP HOST_PORT
+  echo "-A $CHAIN -s $1/32 -p tcp -m conntrack --ctorigdstport $2 --ctdir ORIGINAL -j RETURN"
+}
+
 # Desired content of PROJECTD-WG, one rule per line, in evaluation order.
 desired_rules() {
   echo "-A $CHAIN -m conntrack --ctstate RELATED,ESTABLISHED -j RETURN"
-  local ip
-  for ip in "${MQTT_PEERS[@]}"; do
-    echo "-A $CHAIN -s $ip/32 -p tcp -m tcp --dport 8883 -j RETURN"
-  done
+  local ip port
+  for ip in "${MQTT_PEERS[@]}"; do port_rule "$ip" 8883; done
   for ip in "${DASHBOARD_PEERS[@]}"; do
-    echo "-A $CHAIN -s $ip/32 -p tcp -m multiport --dports 3000,8088 -j RETURN"
+    for port in 3000 8088; do port_rule "$ip" "$port"; done
   done
   if [[ "$ENABLE_PHASE7" == "1" ]]; then
-    for ip in "${PHASE7_MQTT_PEERS[@]}"; do
-      echo "-A $CHAIN -s $ip/32 -p tcp -m tcp --dport 8883 -j RETURN"
-    done
-    for ip in "${PHASE7_API_PEERS[@]}"; do
-      echo "-A $CHAIN -s $ip/32 -p tcp -m tcp --dport 8100 -j RETURN"
-    done
+    for ip in "${PHASE7_MQTT_PEERS[@]}"; do port_rule "$ip" 8883; done
+    for ip in "${PHASE7_API_PEERS[@]}"; do port_rule "$ip" 8100; done
   fi
   # Everything else from the VPN to containers is dropped.
   echo "-A $CHAIN -j DROP"

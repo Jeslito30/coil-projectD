@@ -145,7 +145,9 @@ PROJECTD-WG:  RELATED,ESTABLISHED -> RETURN
               everything else -> DROP
 ```
 
-Do **not** append a `DROP` to `DOCKER-USER` (`iptables -A DOCKER-USER -i wg0 -j DROP`). On Docker versions where `DOCKER-USER` ends with `-j RETURN`, an appended rule is never evaluated and every VPN peer reaches every published port. `tests/security/firewall-netns-test.sh` reproduces this failure with real packets and checks the replacement design (27 checks; no Docker or WireGuard needed).
+Do **not** append a `DROP` to `DOCKER-USER` (`iptables -A DOCKER-USER -i wg0 -j DROP`). On Docker versions where `DOCKER-USER` ends with `-j RETURN`, an appended rule is never evaluated and every VPN peer reaches every published port. `tests/security/firewall-netns-test.sh` reproduces this failure with real packets and checks the replacement design (28 checks; no Docker or WireGuard needed).
+
+Rules match the **published host port** (`-m conntrack --ctorigdstport`), not the container port: `DOCKER-USER` sees packets after Docker's DNAT, so a plain `--dport` would follow any `host:container` mapping change in `compose.yml`. IPv6 is handled by binding every published port to `10.66.0.1` or `127.0.0.1` (no `[::]` listener, which `DOCKER-USER` would never see); `tests/security/test_compose_bindings.py` enforces this in CI.
 
 Allowed traffic returns to `DOCKER-USER` instead of being accepted there, so Docker's own isolation rules still run. `docker-user.sh --check` compares the installed rules with the reviewed allow list; `--remove` is the rollback.
 

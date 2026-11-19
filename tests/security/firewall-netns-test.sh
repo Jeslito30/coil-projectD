@@ -44,10 +44,15 @@ ip -n "$CTR" addr add 172.30.0.2/24 dev "k$SUFFIX"; ip -n "$CTR" link set "k$SUF
 ip -n "$CTR" route add default via 172.30.0.1
 
 # Docker-like plumbing: DNAT published ports, FORWARD jumps to DOCKER-USER first, which ends with RETURN.
+# Most ports are published 1:1. Two mappings differ on purpose, to prove that rules follow the
+# published HOST port: host 8088 -> container 9999 (allowed by host port) and host 13000 -> container
+# 3000 (container port is allowed for dashboards, but host port 13000 is not on any allow list).
 for port in "${PORTS[@]}"; do
-  ip netns exec "$SRV" iptables -t nat -A PREROUTING -d 10.66.0.1 -p tcp --dport "$port" -j DNAT --to-destination "172.30.0.2:$port"
   ip netns exec "$CTR" socat "TCP-LISTEN:$port,fork,reuseaddr" EXEC:'echo ok' &
 done
+dnat() { ip netns exec "$SRV" iptables -t nat -A PREROUTING -d 10.66.0.1 -p tcp --dport "$1" -j DNAT --to-destination "172.30.0.2:$2"; }
+dnat 8883 8883; dnat 3000 3000; dnat 8100 8100; dnat 9999 9999
+dnat 8088 9999; dnat 13000 3000
 ip netns exec "$SRV" iptables -N DOCKER-USER
 ip netns exec "$SRV" iptables -A DOCKER-USER -j RETURN
 ip netns exec "$SRV" iptables -A FORWARD -j DOCKER-USER
@@ -103,7 +108,8 @@ expect 10.66.0.21 8883 open   "Mykyta MQTT"
 expect 10.66.0.22 8883 open   "Darek MQTT"
 expect 10.66.0.21 3000 open   "member Grafana"
 expect 10.66.0.31 3000 open   "faculty Grafana"
-expect 10.66.0.31 8088 open   "faculty team dashboard"
+expect 10.66.0.31 8088 open   "faculty team dashboard (host 8088 -> container 9999)"
+expect 10.66.0.21 13000 closed "host port 13000 closed although its container port 3000 is allowed"
 expect 10.66.0.31 8883 closed "faculty has no MQTT"
 expect 10.66.0.50 8883 closed "unknown peer MQTT"
 expect 10.66.0.50 3000 closed "unknown peer Grafana"
