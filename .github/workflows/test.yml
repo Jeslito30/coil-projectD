@@ -41,8 +41,8 @@ jobs:
           tar -xzf "$tarball" gitleaks
           ./gitleaks dir "$GITHUB_WORKSPACE" --config "$GITHUB_WORKSPACE/.gitleaks.toml" --redact --no-banner --verbose --exit-code 1
 
-      - name: Check published ports and firewall allow list
-        run: python -m unittest tests/security/test_compose_bindings.py -v
+      - name: Check published ports, firewall allow list and env templates
+        run: python -m unittest tests/security/test_compose_bindings.py tests/security/test_env_templates.py -v
 
       - name: Run Grafana tooling tests
         run: python -m unittest discover -s tests/grafana -v
