@@ -82,10 +82,10 @@ def snapshot(args) -> int:
         if not RFC3339.match(value):
             raise SystemExit(f"--start/--stop must be absolute UTC RFC3339 times such as 2026-11-19T02:30:00Z, got {value!r}")
     env = read_env(args.env_file)
-    token = env.get("INFLUX_TOKEN") or sys.exit("INFLUX_TOKEN missing from the env file")
+    token = env.get(args.token_var) or sys.exit(f"{args.token_var} missing from the env file")
     org = env.get("INFLUX_ORG", "coil")
     flux = FLUX.format(bucket=args.bucket, start=args.start, stop=args.stop)
-    cmd = ["docker", "compose", "--env-file", str(args.env_file), "-f", str(ROOT / "deployment/contabo/compose.yml"),
+    cmd = ["docker", "compose", "--env-file", str(args.env_file), "-f", str(args.compose_file),
            "exec", "-T", "influxdb", "influx", "query", "--raw", "--org", org, "--token", token, flux]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
@@ -149,6 +149,9 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     snap = sub.add_parser("snapshot")
     snap.add_argument("--env-file", type=Path, default=ROOT / "deployment/contabo/.env")
+    snap.add_argument("--compose-file", type=Path, default=ROOT / "deployment/contabo/compose.yml",
+                      help="compose file of the stack to query (e.g. the live coil-checkin2 one)")
+    snap.add_argument("--token-var", default="INFLUX_TOKEN", help="variable in the env file holding the operator token")
     snap.add_argument("--bucket", default="sensors")
     snap.add_argument("--start", default="1970-01-01T00:00:00Z")
     snap.add_argument("--stop", required=True, help="absolute UTC end of the window, e.g. the backup time")
