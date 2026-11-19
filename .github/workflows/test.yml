@@ -39,7 +39,7 @@ jobs:
           curl -fsSLO "$base/$tarball"
           curl -fsSL "$base/gitleaks_${GITLEAKS_VERSION}_checksums.txt" | grep " ${tarball}\$" | sha256sum -c -
           tar -xzf "$tarball" gitleaks
-          ./gitleaks dir "$GITHUB_WORKSPACE" --redact --no-banner --exit-code 1
+          ./gitleaks dir "$GITHUB_WORKSPACE" --redact --no-banner --verbose --exit-code 1
 
       - name: Check published ports and firewall allow list
         run: python -m unittest tests/security/test_compose_bindings.py -v
