@@ -27,7 +27,8 @@ services:
     environment:
       MQTT_TELEGRAF_USERNAME: telegraf
       MQTT_TELEGRAF_PASSWORD: ${MQTT_TELEGRAF_PASSWORD:?set MQTT_TELEGRAF_PASSWORD in .env}
-      INFLUX_TOKEN: ${INFLUX_TOKEN:?set INFLUX_TOKEN in .env}
+      # Write-only token for the sensors bucket (scoped_tokens.py); falls back to the operator token.
+      INFLUX_TOKEN: ${INFLUX_TELEGRAF_TOKEN:-${INFLUX_TOKEN:?set INFLUX_TOKEN in .env}}
       INFLUX_ORG: ${INFLUX_ORG:-coil}
     volumes:
       - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
@@ -79,7 +80,8 @@ services:
       GRAFANA_ALERT_EMAIL: ${GRAFANA_ALERT_EMAIL:?set GRAFANA_ALERT_EMAIL in .env}
       INFLUX_URL: http://influxdb:8086
       INFLUX_ORG: ${INFLUX_ORG:-coil}
-      INFLUX_TOKEN: ${INFLUX_TOKEN:?set INFLUX_TOKEN in .env}
+      # Read-only token for the sensors bucket (scoped_tokens.py); falls back to the operator token.
+      INFLUX_TOKEN: ${INFLUX_GRAFANA_TOKEN:-${INFLUX_TOKEN:?set INFLUX_TOKEN in .env}}
     volumes:
       - grafana-data:/var/lib/grafana
       - ../../grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro

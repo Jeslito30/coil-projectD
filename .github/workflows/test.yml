@@ -31,6 +31,9 @@ jobs:
       - name: Run Telegraf registry-check tests
         run: python -m unittest discover -s tests/telegraf -v
 
+      - name: Run InfluxDB scoped-token tests
+        run: python -m unittest discover -s tests/influx -v
+
       - name: Run Wake-on-LAN relay tests
         run: python -m unittest discover -s wol-relay/tests -v
 

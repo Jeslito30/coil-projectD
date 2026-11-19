@@ -86,6 +86,18 @@ docker compose -f deployment/contabo/compose.yml logs --since=10m telegraf
 
 In Grafana, open **Project D - Mati + Szczecin** and confirm six sensors, shared charts, latest values and ages. Use `--anomaly <sensor_id>` and `--silence <sensor_id>` to verify both alert rules and recovery.
 
+### Least-privilege InfluxDB tokens
+
+After the first start, Telegraf and Grafana still use the operator token, which can delete any data. Replace it with a write-only token for Telegraf and a read-only token for Grafana (both limited to the `sensors` bucket):
+
+```bash
+sudo python3 deployment/contabo/scoped_tokens.py --env-file deployment/contabo/.env --dry-run
+sudo python3 deployment/contabo/scoped_tokens.py --env-file deployment/contabo/.env
+docker compose --env-file deployment/contabo/.env -f deployment/contabo/compose.yml up -d --no-deps telegraf grafana
+```
+
+Confirm that new points arrive and the dashboard loads. `--project-name coil-checkin2` targets a stack started under another project name. Compose falls back to `INFLUX_TOKEN` while `INFLUX_TELEGRAF_TOKEN` / `INFLUX_GRAFANA_TOKEN` are empty, so the change is reversible by clearing them. The script only works with this repository's compose file, because a hand-written stack does not read the new variables.
+
 ### Email delivery
 
 Email is a separate acceptance test. Set `GF_SMTP_ENABLED=true` and the `GF_SMTP_*` values in `.env`, recreate Grafana (`up -d grafana`), then test in two steps so a failure points at one layer:
