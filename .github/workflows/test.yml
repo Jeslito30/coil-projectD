@@ -28,6 +28,9 @@ jobs:
       - name: Run Grafana tooling tests
         run: python -m unittest discover -s tests/grafana -v
 
+      - name: Run Telegraf registry-check tests
+        run: python -m unittest discover -s tests/telegraf -v
+
       - name: Run Wake-on-LAN relay tests
         run: python -m unittest discover -s wol-relay/tests -v
 
