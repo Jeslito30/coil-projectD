@@ -1,6 +1,6 @@
 # Optional Phase 7 backend
 
-There is currently no backend service in this directory. The required Project D baseline uses Grafana directly as the team dashboard: **MQTT → Telegraf → InfluxDB → Grafana**. Do not treat this placeholder as a running FastAPI application.
+There is currently no backend service in this directory. The required Project D baseline is **MQTT → Telegraf → InfluxDB → Grafana**, plus the read-only Team Dashboard in `team-dashboard/` (no separate backend needed). Do not treat this placeholder as a running FastAPI application.
 
 A custom backend belongs to optional Phase 7, after the baseline deployment and acceptance tests pass. Its proposed responsibilities are:
 

@@ -47,6 +47,7 @@ The GitHub Actions workflow additionally compiles Python sources, parses JSON/YA
 | `vpn/` | WireGuard templates, peer registry and firewall rules |
 | `tests/` | Delay analysis and infrastructure acceptance-test templates |
 | `backup/` | Restic backup, systemd timer and guarded fresh-VM restore |
+| `team-dashboard/` | Team Dashboard v1: read-only live web view on `10.66.0.1:8088` |
 | `wol-relay/` | Optional Phase 7 Wake-on-LAN relay (not deployed) |
 | `documents/` | Data design, architecture and implementation contracts |
 | `evidence/` | Real test output and screenshots; templates are not evidence |

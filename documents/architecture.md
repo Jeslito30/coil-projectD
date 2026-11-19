@@ -49,7 +49,7 @@ flowchart TB
             TG["Telegraf<br/>JSON → typed points + delay_ms"]
             IDB[("InfluxDB<br/>internal Docker network only")]
             GF["Grafana :3000<br/>both cities · 2 alerts · viewer accounts"]
-            TD["Team dashboard :8080<br/>read-only project view"]
+            TD["Team dashboard :8088<br/>read-only project view"]
         end
         BK["Restic backup<br/>nightly systemd timer"]
     end
@@ -64,7 +64,7 @@ flowchart TB
 
     WG -->|":8883"| MQ
     WG -->|":3000"| GF
-    WG -->|":8080"| TD
+    WG -->|":8088"| TD
     MQ -->|"readings"| TG
     TG -->|"typed points"| IDB
     IDB -->|"queries"| GF
@@ -108,7 +108,7 @@ The Mermaid code above is the **only** source of the diagrams. `architecture.png
 | Telegraf | Subscribe to reading topics, parse and type fields, add `delay_ms`, write to InfluxDB | Docker network plus MQTT connection to Mosquitto | No primary sensor dataset |
 | InfluxDB | Store timestamped readings and support dashboard/test queries | Docker network only; no host `ports:` entry | Dedicated Docker volume |
 | Grafana | Visualise both cities, evaluate both alert types and provide authenticated viewer access | `10.66.0.1:3000`, approved VPN sources only | Dedicated volume plus versioned provisioning |
-| Team dashboard | Provide a simple read-only project view | `10.66.0.1:8080`, approved VPN sources only | No independent source of truth |
+| Team dashboard | Read-only live view of all six sensors (`team-dashboard/`) | `10.66.0.1:8088`, approved VPN sources only | No independent source of truth; read-only InfluxDB token |
 | Restic job | Back up database data and required configuration to encrypted external storage | Outbound only | External repository; credentials outside Git |
 | UFW / `DOCKER-USER` | Restrict host and container access by interface, source and destination port | Host firewall | Versioned rule scripts plus persisted runtime rules |
 

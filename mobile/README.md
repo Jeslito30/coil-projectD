@@ -1,6 +1,6 @@
 # Optional Phase 7 mobile app
 
-No Flutter application is implemented in this directory yet. It is not required for the baseline monitoring system, whose team dashboard is Grafana.
+No Flutter application is implemented in this directory yet. It is not required for the baseline monitoring system, whose dashboards are Grafana and the web Team Dashboard (`team-dashboard/`).
 
 If Phase 7 is approved, the mobile app can consume the optional backend REST API to display two-city readings and request Wake-on-LAN actions. The REST schema and authentication flow must be defined by the Philippines pair; MQTT command/result semantics are documented in [the WoL contract](../documents/wol-contract.md).
 

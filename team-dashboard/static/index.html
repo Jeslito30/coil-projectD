@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project D — Team Dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>Project D <span class="muted">Team Dashboard v1</span></h1>
+      <p class="sub">Mati, Philippines · Szczecin, Poland — live environmental readings over MQTT/TLS through WireGuard</p>
+    </div>
+    <div class="state">
+      <span id="overall" class="pill pill-wait">Loading…</span>
+      <span id="updated" class="muted small"></span>
+    </div>
+  </header>
+
+  <div id="banner" class="banner" hidden></div>
+
+  <main>
+    <section class="city" data-city="Mati">
+      <h2>Mati <span class="muted">Philippines · UTC+8</span></h2>
+      <div class="cards"></div>
+    </section>
+    <section class="city" data-city="Szczecin">
+      <h2>Szczecin <span class="muted">Poland · UTC+1</span></h2>
+      <div class="cards"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p><strong>Pipeline:</strong> simulators → Mosquitto (TLS, per-sensor accounts, ACL) → Telegraf (registry check, delay) → InfluxDB → this read-only view.
+      Status rules match the Grafana alerts: <em>out of range</em> uses the Alert 1 thresholds; <em>silent</em> means no reading for more than <span id="silent-after">120</span> s.</p>
+    <p class="muted small">Reachable only through the Project D VPN. The page refreshes every 10 s; the server caches InfluxDB results for 5 s.</p>
+  </footer>
+</body>
+</html>

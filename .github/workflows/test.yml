@@ -53,11 +53,14 @@ jobs:
       - name: Run InfluxDB scoped-token tests
         run: python -m unittest discover -s tests/influx -v
 
+      - name: Run Team Dashboard tests
+        run: python -m unittest discover -s tests/team-dashboard -v
+
       - name: Run Wake-on-LAN relay tests
         run: python -m unittest discover -s wol-relay/tests -v
 
       - name: Compile Python sources
-        run: python -m compileall -q simulators tests grafana deployment wol-relay
+        run: python -m compileall -q simulators tests grafana deployment wol-relay team-dashboard
 
       - name: Validate JSON and YAML files
         run: |

@@ -1,6 +1,6 @@
 # Contabo deployment — Project D
 
-This compose stack runs Mosquitto (MQTT TLS), Telegraf, InfluxDB 2.x and Grafana. The team dashboard is the provisioned Grafana dashboard **Project D - Mati + Szczecin**. No custom backend is needed for the mandatory monitoring baseline.
+This compose stack runs Mosquitto (MQTT TLS), Telegraf, InfluxDB 2.x, Grafana (alerts and the provisioned dashboard **Project D - Mati + Szczecin**) and the read-only **Team Dashboard v1** on `10.66.0.1:8088` (`team-dashboard/`). No custom backend is needed for the mandatory monitoring baseline.
 
 ## Network and data policy
 

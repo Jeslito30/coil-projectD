@@ -97,6 +97,36 @@ services:
       start_period: 30s
     networks: [projectd]
 
+  team-dashboard:
+    # Team Dashboard v1 (team-dashboard/): read-only live view on 8088, VPN and loopback only.
+    image: python:3.12-alpine
+    restart: unless-stopped
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    command: ["python", "/app/server.py"]
+    user: "65534:65534"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    ports:
+      - "10.66.0.1:8088:8088"
+      - "127.0.0.1:18088:8088"
+    environment:
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_ORG: ${INFLUX_ORG:-coil}
+      # Read-only token: a dedicated one, else Grafana's read-only token, else the operator token.
+      INFLUX_TOKEN: ${INFLUX_DASHBOARD_TOKEN:-${INFLUX_GRAFANA_TOKEN:-${INFLUX_TOKEN:?set INFLUX_TOKEN in .env}}}
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      - ../../team-dashboard:/app:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8088/healthz', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks: [projectd]
+
 networks:
   projectd:
     driver: bridge
