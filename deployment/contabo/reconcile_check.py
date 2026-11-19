@@ -11,13 +11,16 @@ compose file, show every difference that could lose data or expose a port:
 
 It changes nothing and never prints environment variables (they contain tokens and passwords).
 Run on the server from the repository root, as a user that may run docker:
-    python3 deployment/contabo/reconcile_check.py --env-file deployment/contabo/.env > reconcile-$(date -u +%F).md
+    sudo python3 deployment/contabo/reconcile_check.py > reconcile-$(date -u +%F).md
+--env-file is optional: only the structure of compose.yml is compared, never values, so required
+variables missing from the host's .env are filled with placeholders for rendering.
 Exit status: 0 = no HIGH findings, 1 = at least one HIGH finding, 2 = could not run.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -63,11 +66,28 @@ def image_repo(image: str) -> str:
     return image
 
 
+# Variables compose.yml marks as required (${VAR:?...}). Only the model's structure is compared,
+# never values, so a placeholder lets the check run on a host whose .env was written for another stack.
+REQUIRED_VARS = ("INFLUX_ADMIN_USER", "INFLUX_ADMIN_PASSWORD", "INFLUX_TOKEN", "MQTT_TELEGRAF_PASSWORD",
+                 "GRAFANA_ADMIN_PASSWORD", "GRAFANA_ALERT_EMAIL")
+
+
 def expected_model(env_file: Path | None) -> dict:
     cmd = ["docker", "compose", "-f", str(COMPOSE)]
     if env_file:
         cmd[2:2] = ["--env-file", str(env_file)]
-    return json.loads(run(cmd + ["config", "--format", "json"]))
+    present = set()
+    if env_file and env_file.exists():
+        present = {line.split("=", 1)[0].strip() for line in env_file.read_text(encoding="utf-8").splitlines()
+                   if "=" in line and not line.lstrip().startswith("#") and line.split("=", 1)[1].strip()}
+    env = dict(os.environ)
+    for name in REQUIRED_VARS:
+        if name not in present and not env.get(name):
+            env[name] = "reconcile-placeholder"
+    result = subprocess.run(cmd + ["config", "--format", "json"], capture_output=True, text=True, env=env)
+    if result.returncode != 0:
+        raise RuntimeError(f"docker compose config failed: {result.stderr.strip()[:300]}")
+    return json.loads(result.stdout)
 
 
 def expected_ports(service: dict) -> set[tuple[str, str, str]]:
@@ -229,7 +249,7 @@ def check_host(report: Report) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Read-only Project D deployment reconciliation")
-    parser.add_argument("--env-file", type=Path, help="deployment .env (needed for Compose to render the model)")
+    parser.add_argument("--env-file", type=Path, help="optional .env used to render compose.yml (values are not compared)")
     args = parser.parse_args(argv)
     if not shutil.which("docker"):
         print("docker is required", file=sys.stderr)

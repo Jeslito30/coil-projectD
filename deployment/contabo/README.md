@@ -17,7 +17,7 @@ A Project D stack is already running on Contabo. **Do not run `docker compose up
 1. Run the read-only check and keep the report with the evidence (it prints no secrets):
 
    ```bash
-   sudo python3 deployment/contabo/reconcile_check.py --env-file deployment/contabo/.env > reconcile-$(date -u +%F).md
+   sudo python3 deployment/contabo/reconcile_check.py > reconcile-$(date -u +%F).md
    ```
 
    It lists, per service, the running project, image, data mount and published ports against `compose.yml`, plus `10.66.0.1`, `wg0` and the first `DOCKER-USER` rule. Exit status 1 means at least one **HIGH** finding.
