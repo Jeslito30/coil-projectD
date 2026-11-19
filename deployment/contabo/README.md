@@ -38,7 +38,14 @@ A Project D stack is already running on Contabo. **Do not run `docker compose up
 
 Install Docker Engine with the Compose plugin, WireGuard and an NTP client. Configure `wg0` as `10.66.0.1/24`, enrol only the public keys in `vpn/peers.md`, and verify clock synchronisation before measuring delay.
 
-Clone the repository and run all commands below from its root. Review the pinned images and configuration before starting anything.
+Make Docker start after WireGuard, otherwise the containers bound to `10.66.0.1` fail after a reboot:
+
+```bash
+sudo install -D -m 644 deployment/contabo/docker-after-wireguard.conf /etc/systemd/system/docker.service.d/after-wireguard.conf
+sudo systemctl daemon-reload
+```
+
+Clone the repository to `/opt/coil-projectD` (the path the supplied systemd units use) and run all commands below from its root. Review the pinned images and configuration before starting anything.
 
 ## 2. Generate MQTT certificates and accounts
 

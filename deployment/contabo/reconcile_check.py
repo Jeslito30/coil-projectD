@@ -227,6 +227,14 @@ def check_host(report: Report) -> None:
     report.out(f"- 10.66.0.1 configured: {'yes' if has_vpn_ip else 'NO'}")
     if not has_vpn_ip:
         report.add("HIGH", "10.66.0.1 is not configured; the repository stack cannot bind MQTT/Grafana to the VPN address.")
+    if shutil.which("systemctl"):
+        after = run(["systemctl", "show", "docker", "-p", "After"], check=False)
+        ordered = "wg-quick@wg0.service" in after
+        report.out(f"- Docker starts after wg-quick@wg0: {'yes' if ordered else 'NO'}")
+        if not ordered:
+            report.add("MEDIUM", "Docker is not ordered after wg-quick@wg0. After a reboot, containers bound to "
+                                 "10.66.0.1 can fail to start and stay down. Install "
+                                 "deployment/contabo/docker-after-wireguard.conf.")
     if shutil.which("wg"):
         peers = run(["wg", "show", "wg0", "peers"], check=False).split()
         report.out(f"- wg0 peers: {len(peers)}")
