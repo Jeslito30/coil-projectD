@@ -6,12 +6,21 @@ umask 077
 ROOT="${PROJECT_ROOT:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}"
 BACKUP_ENV="${BACKUP_ENV:-$ROOT/backup/restic.env}"
 [[ -r "$BACKUP_ENV" ]] || { echo "Missing Restic environment: $BACKUP_ENV" >&2; exit 1; }
-[[ -r "$ROOT/deployment/contabo/.env" ]] || { echo "Missing deployment .env" >&2; exit 1; }
+# A stack that was not started from this repository (e.g. coil-checkin2) is backed up through ITS OWN
+# compose and .env files: PROJECTD_COMPOSE_FILE / PROJECTD_ENV_FILE. Its service names must be
+# influxdb, grafana and mosquitto. The project name then comes from that compose setup, so no
+# COMPOSE_PROJECT_NAME override (and no risk of "up" on the wrong volumes) is needed.
+ENV_FILE="${PROJECTD_ENV_FILE:-$ROOT/deployment/contabo/.env}"
+COMPOSE_FILE="${PROJECTD_COMPOSE_FILE:-$ROOT/deployment/contabo/compose.yml}"
+[[ -r "$ENV_FILE" ]] || { echo "Missing deployment .env: $ENV_FILE" >&2; exit 1; }
+[[ -r "$COMPOSE_FILE" ]] || { echo "Missing compose file: $COMPOSE_FILE" >&2; exit 1; }
 
 # These files are root-only configuration, not executable project code.
 set -a
 source "$BACKUP_ENV"
-source "$ROOT/deployment/contabo/.env"
+source "$ENV_FILE"
+# The operator token may have another name in a hand-built stack: BACKUP_INFLUX_TOKEN_VAR names it.
+if [[ -n "${BACKUP_INFLUX_TOKEN_VAR:-}" ]]; then INFLUX_TOKEN="${!BACKUP_INFLUX_TOKEN_VAR:-}"; fi
 set +a
 : "${RESTIC_REPOSITORY:?set in restic.env}"
 : "${RESTIC_PASSWORD:?set in restic.env}"
@@ -19,7 +28,7 @@ set +a
 
 command -v restic >/dev/null || { echo "restic is required" >&2; exit 1; }
 command -v docker >/dev/null || { echo "docker is required" >&2; exit 1; }
-COMPOSE=(docker compose --env-file "$ROOT/deployment/contabo/.env" -f "$ROOT/deployment/contabo/compose.yml")
+COMPOSE=(docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE")
 
 STAGING_PARENT="${BACKUP_STAGING:-/var/tmp}"
 mkdir -p "$STAGING_PARENT"
@@ -43,19 +52,41 @@ echo "[$(date -u +%FT%TZ)] Creating consistent service backups"
 "${COMPOSE[@]}" exec -T influxdb influx backup "$CONTAINER_BACKUP" --token "$INFLUX_TOKEN"
 "${COMPOSE[@]}" cp "influxdb:$CONTAINER_BACKUP/." "$STAGING/influxdb/"
 "${COMPOSE[@]}" exec -T influxdb rm -rf "$CONTAINER_BACKUP"
+# InfluxDB CLI configuration (the "influx-config" volume): not needed for a restore, kept for reference.
+mkdir -p "$STAGING/influxdb-config"
+"${COMPOSE[@]}" cp influxdb:/etc/influxdb2/. "$STAGING/influxdb-config/" >/dev/null 2>&1 || true
 
-# Briefly stop Grafana and Mosquitto for consistent SQLite and persistence copies.
-# Telegraf/simulators reconnect automatically; record this maintenance window in the log.
-"${COMPOSE[@]}" stop grafana mosquitto
-STOPPED=1
+# By default Grafana and Mosquitto stop for a few seconds, so the SQLite database and the broker
+# persistence file are copied in a consistent state; simulators and Telegraf reconnect and resend.
+# BACKUP_STOP_SERVICES=0 copies them while running (no interruption, small risk of a torn copy).
+if [[ "${BACKUP_STOP_SERVICES:-1}" == "1" ]]; then
+  "${COMPOSE[@]}" stop grafana mosquitto
+  STOPPED=1
+fi
 "${COMPOSE[@]}" cp grafana:/var/lib/grafana/. "$STAGING/grafana/"
 "${COMPOSE[@]}" cp mosquitto:/mosquitto/data/. "$STAGING/mosquitto-data/"
-"${COMPOSE[@]}" start grafana mosquitto
-STOPPED=0
+if [[ "$STOPPED" == 1 ]]; then
+  "${COMPOSE[@]}" start grafana mosquitto
+  STOPPED=0
+fi
 
 # Restic encryption protects the configuration and secrets needed for a fresh-VM restore.
 for path in backup deployment docker documents grafana simulators tests vpn; do
   [[ ! -e "$ROOT/$path" ]] || cp -a "$ROOT/$path" "$STAGING/project/"
+done
+
+# Extra directories, e.g. the live deployment directory with its compose file, .env, Telegraf and
+# Mosquitto configuration and certificates: BACKUP_EXTRA_PATHS="/opt/A:/etc/B" (colon-separated).
+# Each is stored under extra/<absolute path> in the encrypted snapshot.
+IFS=':' read -r -a EXTRA_PATHS <<< "${BACKUP_EXTRA_PATHS:-}"
+for extra in "${EXTRA_PATHS[@]}"; do
+  [[ -n "$extra" ]] || continue
+  if [[ -e "$extra" ]]; then
+    mkdir -p "$STAGING/extra$(dirname -- "$extra")"
+    cp -a "$extra" "$STAGING/extra$extra"
+  else
+    echo "WARNING: BACKUP_EXTRA_PATHS entry not found: $extra" >&2
+  fi
 done
 
 # The WireGuard server key is part of the service identity: without it a restored server gets a new

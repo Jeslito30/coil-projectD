@@ -8,10 +8,13 @@ After=network-online.target docker.service
 Type=oneshot
 User=root
 Group=root
+# Defaults; /etc/projectd/backup.env (optional, see backup/backup.env.example) overrides them,
+# e.g. another checkout path or the compose/.env files of a hand-built stack.
 Environment=PROJECT_ROOT=/opt/coil-projectD
 Environment=BACKUP_ENV=/etc/projectd/restic.env
-ExecStart=/opt/coil-projectD/backup/backup.sh
-WorkingDirectory=/opt/coil-projectD
+EnvironmentFile=-/etc/projectd/backup.env
+ExecStart=/bin/bash -c 'exec "$PROJECT_ROOT/backup/backup.sh"'
+WorkingDirectory=/
 Nice=10
 IOSchedulingClass=best-effort
 IOSchedulingPriority=6
