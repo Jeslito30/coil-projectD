@@ -71,3 +71,19 @@ BACKUP_ENV=/etc/projectd/restic.env backup/restore.sh \
 The script restores InfluxDB through its native backup format, restores Grafana and Mosquitto volumes while those services are stopped, and starts the Compose stack. It refuses an existing destination and never overwrites the original installation.
 
 Finally complete every check in `tests/restore/restore-log.md`: historical samples, new end-to-end ingestion, dashboard and alert recovery, authentication/ACLs, and VPN-only port bindings. Record the actual date, snapshot ID, timings and evidence. Do not mark recovery tested from a dry run or from these commands alone.
+
+## One-time export from the existing `coil-checkin2` stack (migration)
+
+The data moves to the dedicated VPS through a normal backup and the fresh-VM restore, so the migration doubles as the required restore test. On the new server the data lands in the repository's own volumes (`coil-projectd_*`). Do not rename volumes in `compose.yml` to the old names.
+
+On Contabo, in a reviewed checkout of the repository:
+
+1. Copy the live broker files into the checkout, so sensors keep their credentials and CA on the new server: `passwd`, `acl` → `docker/mosquitto/config/`, `ca.crt`, `server.crt`, `server.key` → `docker/mosquitto/certs/` (not `ca.key`).
+2. Create `deployment/contabo/.env` (root, mode 600) with the **current** values: `INFLUX_TOKEN` = the existing operator token, the InfluxDB and Grafana admin credentials, `MQTT_TELEGRAF_PASSWORD`, SMTP settings. The restored server uses this file as is.
+3. Record the source inventory for a fixed window: `COMPOSE_PROJECT_NAME=coil-checkin2 python3 tests/restore/inventory.py snapshot --stop <time> > inventory-source.csv`
+4. Back up the running stack: `sudo COMPOSE_PROJECT_NAME=coil-checkin2 backup/backup.sh`. The service names match, so `exec`/`cp`/`stop`/`start` act on the running containers. Grafana and Mosquitto stop for a few seconds; sensors queue and resend.
+
+> **Never** run `docker compose up`, `down` or `run` with `COMPOSE_PROJECT_NAME=coil-checkin2`. The running InfluxDB volume is `coil-checkin2_influx-data`, but the repository's key is `influxdb-data`, so `up` would recreate InfluxDB on an empty volume.
+
+On the new VPS: `backup/restore.sh --snapshot latest --apply --yes`, then `inventory.py snapshot` with the same window, then `inventory.py compare`. Keep `coil-checkin2` running until the comparison passes; it is the rollback.
+
