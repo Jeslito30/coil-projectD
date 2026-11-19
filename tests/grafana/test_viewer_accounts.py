@@ -174,7 +174,7 @@ class ViewerAccountsTest(unittest.TestCase):
         self.assertNotIn("POST", [method for method, _ in self.state.calls])
 
     def test_wrong_admin_password_fails_cleanly(self):
-        os.environ["GRAFANA_ADMIN_PASSWORD"] = "wrong"
+        os.environ["GRAFANA_ADMIN_PASSWORD"] = secrets.token_hex(8)  # random wrong value
         code, out = self.run_script()
         self.assertEqual(code, 1)
         self.assertIn("HTTP 401", out)
