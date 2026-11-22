@@ -64,3 +64,17 @@ Record the peer name, date, handshake, allowed result and at least one denied re
 | Phone opens no API | Phase 7 is enabled, phone uses its own `.13`/`.14`/`.23`/`.24` profile, backend port 8000 is allowed and JWT login is valid |
 
 For a lost phone or laptop, notify the administrator immediately so that specific peer can be revoked without changing anyone else's profile.
+
+## Faculty phones (ready-to-import profile)
+
+Faculty scan a QR code in the WireGuard app instead of handling keys. The admin creates the profile on the server:
+
+```bash
+sudo apt install qrencode
+sudo vpn/make-phone-profile.sh --name faculty-pl --ip 10.66.0.32 --endpoint <server-host>:51820 --apply --show
+```
+
+- The profile is split-tunnel to `10.66.0.1/32`: the phone reaches only the Project D server (Team Dashboard on `http://10.66.0.1:8088`, Grafana on `:3000`).
+- The private key exists only in `/root/projectd-profiles/<name>/` (root, mode 600) until it is deleted. Show the QR in person (`--show`), or send the PNG through a private channel agreed with the recipient. Never post it on Discord, by unencrypted e-mail, or in the repository.
+- After a successful import, `shred -u` the files (the script prints the exact command). To revoke the profile, remove the peer from `wg0`.
+- Tested offline: the QR decodes byte for byte to the generated profile, and output permissions are 700/600.
