@@ -39,6 +39,33 @@ services:
       retries: 3
     networks: [live]
 
+  # Optional push-only public mirror (README "Public mirror"). Start with: --profile public-mirror
+  public-mirror:
+    image: python:3.12-alpine
+    profiles: ["public-mirror"]
+    restart: unless-stopped
+    command: ["python", "/app/publish_b2.py"]
+    user: "65534:65534"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      INFLUX_URL: ${INFLUX_URL:-http://influxdb:8086}
+      INFLUX_ORG: ${INFLUX_ORG:?set INFLUX_ORG}
+      INFLUX_TOKEN: ${INFLUX_DASHBOARD_TOKEN:?create a read-only token, see team-dashboard/README.md}
+      INFLUX_BUCKET: ${INFLUX_BUCKET:-sensors}
+      INFLUX_MEASUREMENT: ${INFLUX_MEASUREMENT:-environment}
+      VALUE_FIELD: ${VALUE_FIELD:-value}
+      DELAY_FIELD: ${DELAY_FIELD:-delay_ms}
+      B2_KEY_ID: ${MIRROR_B2_KEY_ID:-}
+      B2_APP_KEY: ${MIRROR_B2_APP_KEY:-}
+      B2_BUCKET: ${MIRROR_B2_BUCKET:-}
+      PUBLISH_INTERVAL: ${MIRROR_INTERVAL:-60}
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      - ./:/app:ro
+    networks: [live]
+
 networks:
   live:
     external: true

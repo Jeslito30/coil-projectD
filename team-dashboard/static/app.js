@@ -2,6 +2,10 @@
 "use strict";
 
 const REFRESH_MS = 10000;
+const meta = name => (document.querySelector(`meta[name="${name}"]`) || {}).content;
+const SUMMARY_URL = meta("projectd-summary") || "/api/summary";
+const MIRROR = meta("projectd-mode") === "public-mirror";
+const STALE_AFTER_S = MIRROR ? 300 : 60;
 const LABEL = { ok: "OK", out_of_range: "Out of range", silent: "Silent", no_data: "No data" };
 const TYPE = { temperature: "Temperature", humidity: "Humidity", airquality: "Air quality (PM2.5)" };
 let lastGood = null;
@@ -93,12 +97,18 @@ function render(data, stale) {
 async function refresh() {
   const banner = document.getElementById("banner");
   try {
-    const response = await fetch("/api/summary", { cache: "no-store" });
+    const response = await fetch(SUMMARY_URL, { cache: "no-store" });
     const data = await response.json();
     if (!response.ok) throw new Error(data.detail || response.status);
     lastGood = data;
-    banner.hidden = true;
-    render(data, false);
+    const ageS = (Date.now() - Date.parse(data.generated_at)) / 1000;
+    if (ageS > STALE_AFTER_S) {
+      banner.hidden = false;
+      banner.textContent = `Data is ${Math.round(ageS / 60)} min old: the ${MIRROR ? "mirror upload" : "data source"} may have stopped.`;
+    } else {
+      banner.hidden = true;
+    }
+    render(data, ageS > STALE_AFTER_S);
   } catch (err) {
     banner.hidden = false;
     banner.textContent = `Could not load live data (${err.message}). ${lastGood ? "Showing the last good values." : ""}`;
@@ -111,5 +121,6 @@ async function refresh() {
   }
 }
 
+document.getElementById("mirror").hidden = !MIRROR;
 refresh();
 setInterval(refresh, REFRESH_MS);

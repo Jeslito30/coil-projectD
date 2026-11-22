@@ -57,6 +57,30 @@ Then open **http://10.66.0.1:8088** from a device on the VPN. If the page says *
 
 Rollback: `docker compose -p projectd-dashboard -f team-dashboard/compose.live.yml down` (removes only the dashboard container).
 
+## Public mirror for faculty without VPN (push-only)
+
+Faculty can also open a public copy of the dashboard in a browser. The server **pushes** it out. Nothing is served from the VM, so no port is opened and "only WireGuard open" still holds. `publish_b2.py` builds the same summary as the live page (read-only token, fixed queries) and uploads it every 60 s as `summary.json`, next to a static copy of the page, to a **public Backblaze B2 bucket**.
+
+**What becomes public:** the six sensors' readings, statuses, last-hour series and delays. No token, host name or IP address is published (a test checks this). Tell the faculty that the mirror is public and refreshed about every minute; the live view stays at `http://10.66.0.1:8088` on the VPN.
+
+Set up once (B2 web console):
+1. **Buckets → Create a Bucket:** a unique name (e.g. `projectd-coil-dashboard-<random>`), files **Public**. Lifecycle: **Keep only the last version** (each upload replaces `summary.json`).
+2. **Application Keys → Add a New Application Key:** access to **that bucket only**, type **Write Only**. Use a separate bucket and key, never the backup ones: a leak of this key must not reach the backups.
+3. Add to `/etc/projectd/dashboard.env` (600): `MIRROR_B2_BUCKET=...`, `MIRROR_B2_KEY_ID=...`, `MIRROR_B2_APP_KEY=...`
+
+Start next to the live stack:
+
+```bash
+docker compose -p projectd-dashboard --env-file /etc/projectd/dashboard.env -f team-dashboard/compose.live.yml --profile public-mirror up -d
+docker logs projectd-dashboard-public-mirror-1 | head   # prints the public URL of index.html
+```
+
+Give the faculty the printed URL (`https://f00X.backblazeb2.com/file/<bucket>/index.html`). The page shows a "public mirror" note and warns if the data is more than 5 minutes old. Stop: `... --profile public-mirror stop public-mirror`.
+
+Cost: about 1,440 small uploads a day. [Likely] This stays inside B2's free transaction allowance; check the B2 *Caps & Alerts* page after the first day.
+
+Tests: `tests/team-dashboard/test_publish_b2.py` runs against stand-ins of the B2 v3 API and InfluxDB. It covers the upload protocol with SHA1 and cache headers, re-authorization after an expired token, the mirror page rewrite, and a check that no secret or internal host is published. Not yet run against real B2.
+
 ## On the dedicated VPS
 
 The service `team-dashboard` is part of `deployment/contabo/compose.yml`. It uses `INFLUX_DASHBOARD_TOKEN` if set, otherwise Grafana's read-only token from `scoped_tokens.py`.
