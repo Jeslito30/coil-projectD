@@ -25,6 +25,7 @@
 !*.conf.template
 !mosquitto.conf
 !telegraf.conf
+!docker-after-wireguard.conf
 wg*.key
 wg*.pub.private
 *.qr.png

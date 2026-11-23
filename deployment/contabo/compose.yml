@@ -87,7 +87,6 @@ services:
       - ../../grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
       - ../../grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
       - ../../grafana/provisioning/alerting:/etc/grafana/provisioning/alerting:ro
-      - ../../grafana/alert-rules.yaml:/etc/grafana/provisioning/alerting/alert-rules.yaml:ro
       - ../../grafana/dashboard-two-cities.json:/var/lib/grafana/dashboards/project-d-two-cities.json:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/health | grep -q ok"]
