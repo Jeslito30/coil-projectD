@@ -1,0 +1,12 @@
+{
+  "commit": "b0414de7ea38f8ab7dea5da778ff7f7e03b45188",
+  "service": "projectd-sim@szczecin",
+  "control_service": "projectd-sim@mati",
+  "stopped_utc": "2026-11-23T20:12:01+00:00",
+  "firing_utc": "2026-11-23T20:13:47+00:00",
+  "restart_utc": "2026-11-23T20:14:32+00:00",
+  "seconds_to_all_three_szczecin_alerts": 106,
+  "all_six_normal_after_recovery": true,
+  "email_delivery_tested": false,
+  "email_note": "SMTP disabled; this test covers Grafana alert state and recovery only."
+}
