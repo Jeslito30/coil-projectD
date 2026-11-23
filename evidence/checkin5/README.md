@@ -2,7 +2,7 @@
 
 The production system stays on Contabo. These results come from a **second, independent server** that Darek deployed from this repository to prove the setup guide works on a clean machine and to run tests without touching production. It uses its own keys and secrets; none of them are in this folder.
 
-Start here: [requirements and evidence matrix](requirements-evidence.md) · [setup and restore runbook](setup-runbook.md) · [demo recording script](demo-script.md) · deck `Project-D-standalone-testing-EN.pptx`.
+Start here: [requirements and evidence matrix](requirements-evidence.md) · [setup and restore runbook](setup-runbook.md) · [demo recording script](demo-script.md) · standalone deck `Project-D-standalone-testing-EN.pptx` · **joint final draft** `Project-D-joint-final-draft.pptx` (13 slides; Mati, production and faculty-access slides are marked for their owners) · **rough-cut video** `Project-D-standalone-rough-cut.mp4` (70 s, captions, no narration; standalone evidence only).
 
 ## Done
 
