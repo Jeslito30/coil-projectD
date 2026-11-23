@@ -1,0 +1,16 @@
+=== BEFORE ===
+8ebe6daa085eb06373d5f7377c24165efb669eda
+ M .gitignore
+ M deployment/contabo/compose.yml
+ M vpn/add-peer.sh
+?? deployment/contabo/docker-after-wireguard.conf
+?? docker/mosquitto/certs/
+?? grafana/provisioning/alerting/alert-rules.yaml
+=== FETCH ===
+=== RESET ===
+HEAD is now at b0414de Fix standalone deploy blockers found on the first real run; add remove-peer.sh
+=== AFTER ===
+b0414de7ea38f8ab7dea5da778ff7f7e03b45188
+?? docker/mosquitto/certs/
+=== SHELL SYNTAX ===
+SHELL_SYNTAX_OK

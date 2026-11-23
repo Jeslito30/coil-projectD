@@ -1,0 +1,28 @@
+DEPLOY_START=2026-11-23T19:51:29Z
+[20:51:29] Project D standalone deployment, repo b0414de, endpoint <standalone-server>
+  -> packages                       34s (total 34s)
+[20:52:03] Keeping existing /etc/wireguard/wg0.conf
+  -> wireguard                       0s (total 34s)
+  -> mqtt certificates/accounts      0s (total 34s)
+[20:52:03] Keeping existing /opt/coil-projectD/deployment/contabo/.env
+  -> secrets (.env)                  0s (total 34s)
+  -> stack up (healthy)              2s (total 36s)
+  -> scoped tokens                   0s (total 36s)
+  -> simulators                      1s (total 37s)
+  -> vpn profile                     0s (total 37s)
+[20:52:06] Waiting up to 3 min for readings from all six sensors...
+[20:52:16] Sensors with readings in the last 5 min: 6/6
+  -> end-to-end check               10s (total 47s)
+[20:52:16] Public listeners: SSH 22/tcp and WireGuard 51820/udp only
+[20:52:16] DEPLOY_STATUS=0 total 47s (00:00:47)
+
+Next steps
+  1. Copy the laptop profile to Windows (PowerShell):  scp root@<standalone-server>:/root/projectd-profiles/darek-laptop/darek-laptop.conf .
+     Import it in the WireGuard app. Only one tunnel to 10.66.0.0/24 can be active at a time.
+  2. With the tunnel on: Grafana http://10.66.0.1:3000 (user admin), Team Dashboard http://10.66.0.1:8088
+     Grafana password, on the server:  grep ^GRAFANA_ADMIN_PASSWORD= /opt/coil-projectD/deployment/contabo/.env
+  3. Secrets stay on this server: /opt/coil-projectD/deployment/contabo/.env, /root/projectd-secrets/ (CA key, MQTT passwords). Never post them.
+Report: /root/projectd-evidence/standalone-deploy-20261123T195129Z.txt
+DEPLOY_END=2026-11-23T19:52:16Z
+DEPLOY_STATUS=0
+DEPLOY_SECONDS=47

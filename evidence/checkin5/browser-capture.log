@@ -1,0 +1,5 @@
+2026-11-23T20:11:20Z READY baseline Normal; screenshots captured
+2026-11-23T20:13:45Z FIRING {'SZCZ-AIR-01': 'Alerting', 'SZCZ-HUM-01': 'Alerting', 'SZCZ-TEMP-01': 'Alerting', 'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:13:48Z FIRING screenshots captured
+2026-11-23T20:14:45Z RECOVERED {'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal', 'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'}
+2026-11-23T20:14:51Z CAPTURE_STATUS=PASS
