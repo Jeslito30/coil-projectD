@@ -27,7 +27,7 @@ done
 # Order matters: allow rules first, default policies last.
 COMMANDS=(
   "ufw allow 51820/udp"
-  "ufw allow in on wg0 from 10.66.0.11 to 10.66.0.1 port 22 proto tcp"
+  "ufw allow in on wg0 from 10.66.0.10 to 10.66.0.1 port 22 proto tcp"
   "ufw allow in on wg0 from 10.66.0.12 to 10.66.0.1 port 22 proto tcp"
   "ufw allow in on wg0 from 10.66.0.21 to 10.66.0.1 port 22 proto tcp"
   "ufw allow in on wg0 from 10.66.0.22 to 10.66.0.1 port 22 proto tcp"

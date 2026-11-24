@@ -1,0 +1,32 @@
+# Szczecin simulator configuration (Project D, data-design.md v0.2).
+# Copy to config.yaml next to this file. config.yaml is git-ignored (real broker address, local paths).
+# Passwords are NOT stored here: set MQTT_SZCZ_TEMP_01_PASSWORD, MQTT_SZCZ_HUM_01_PASSWORD and
+# MQTT_SZCZ_AIR_01_PASSWORD in the environment, or pass --secrets-file with KEY=VALUE lines.
+
+city: Szczecin
+
+broker:
+  # Mosquitto is reachable only through WireGuard on the server's VPN address.
+  host: 10.66.0.1
+  port: 8883
+  # Public project CA certificate (docker/mosquitto/certs/ca.crt), received from the server admin.
+  ca_file: ca.crt
+  keepalive: 30
+
+# Nominal interval required by the project. Use --interval only for tests.
+interval_seconds: 30
+
+# Bounded in-memory offline queue per sensor (paho max_queued_messages).
+# 2000 readings = about 16.7 hours at 30 s. Lost if the simulator process restarts.
+queue_limit: 2000
+
+# JSON-lines event log for interruption and delay analysis (git-ignored *.jsonl).
+log_file: simulator-szczecin.jsonl
+
+sensors:
+  - sensor_id: SZCZ-TEMP-01
+    sensor_type: temperature
+  - sensor_id: SZCZ-HUM-01
+    sensor_type: humidity
+  - sensor_id: SZCZ-AIR-01
+    sensor_type: airquality

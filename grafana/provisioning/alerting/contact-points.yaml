@@ -1,0 +1,12 @@
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: grafana-default-email
+    receivers:
+      - uid: project-d-email
+        type: email
+        settings:
+          addresses: $GRAFANA_ALERT_EMAIL
+          singleEmail: false
+        disableResolveMessage: false

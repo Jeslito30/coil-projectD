@@ -23,17 +23,17 @@ The network is hub-and-spoke. Every peer connects to the central cloud server; P
 | VPN IP | Peer name | Person / device | Role |
 | --- | --- | --- | --- |
 | `10.66.0.1` | `server` | Cloud VM | Hub and all core services |
-| `10.66.0.11` | `ph-member-1` | Filipino member 1 laptop | Member / Mati administration |
+| `10.66.0.10` | `ph-member-1` | Jeslito laptop | Active member / Mati administration |
 | `10.66.0.12` | `ph-member-2` | Filipino member 2 laptop | Member / Mati administration |
 | `10.66.0.13` | `ph-phone-1` | Filipino member 1 phone | Mobile backend access, Phase 7 only |
 | `10.66.0.14` | `ph-phone-2` | Filipino member 2 phone | Mobile backend access, Phase 7 only |
 | `10.66.0.15` | `mati-sim` | Device running the Mati simulator | Sensor publisher |
 | `10.66.0.16` | `mati-monitor` | Optional monitored computer in Mati | Computer monitoring, Phase 7 only |
-| `10.66.0.21` | `pl-member-1` | Polish member 1 laptop | Member / Szczecin administration |
-| `10.66.0.22` | `pl-member-2` | Polish member 2 laptop | Member / Szczecin administration |
+| `10.66.0.21` | `pl-member-2` | Mykyta laptop | Active member / Szczecin administration; runs the Szczecin simulator |
+| `10.66.0.22` | `pl-member-1` | Darek computer | Active member |
 | `10.66.0.23` | `pl-phone-1` | Polish member 1 phone | Mobile backend access, Phase 7 only |
 | `10.66.0.24` | `pl-phone-2` | Polish member 2 phone | Mobile backend access, Phase 7 only |
-| `10.66.0.25` | `szcz-sim` | Device running the Szczecin simulator | Sensor publisher |
+| `10.66.0.25` | `szcz-sim` | Reserved separate simulator host | Not used; the simulator runs on Mykyta's laptop `10.66.0.21` |
 | `10.66.0.31` | `faculty-dorsu` | DOrSU faculty member | Dashboard viewer |
 | `10.66.0.32` | `faculty-pm` | Maritime University of Szczecin faculty member | Dashboard viewer |
 | `10.66.0.41` | `pl-wol-relay` | Optional WoL relay in Szczecin | WoL demonstration relay, Phase 7 only |
@@ -50,11 +50,11 @@ Core services listen on `10.66.0.1` or only on the internal Docker network. A VP
 | Service | Port | Listens on | Allowed VPN sources |
 | --- | --- | --- | --- |
 | WireGuard | `51820/udp` | Public interface | Internet; peer authentication still required |
-| SSH | `22/tcp` | Server SSH interface, restricted by firewall | `.11`, `.12`, `.21`, `.22` |
-| MQTT over TLS | `8883/tcp` | `10.66.0.1` | `.11`, `.12`, `.15`, `.21`, `.22`, `.25`; add `.16`, `.41` / `.42` only when their Phase 7 roles require it |
-| Grafana | `3000/tcp` | `10.66.0.1` | `.11`, `.12`, `.21`, `.22`, `.31`, `.32` |
-| Team dashboard | `8080/tcp` | `10.66.0.1` | `.11`, `.12`, `.21`, `.22`, `.31`, `.32` |
-| Backend API — **Phase 7 extension** | `8000/tcp` | `10.66.0.1` | `.11`, `.12`, `.13`, `.14`, `.21`, `.22`, `.23`, `.24`; JWT authentication still required |
+| SSH | `22/tcp` | Server SSH interface, restricted by firewall | `.10`, `.12`, `.21`, `.22` |
+| MQTT over TLS | `8883/tcp` | `10.66.0.1` | `.10`, `.21`, `.22` (active); add `.12`, `.15` or `.25` only after that peer is enrolled; add `.16`, `.41` / `.42` only when their Phase 7 roles require it |
+| Grafana | `3000/tcp` | `10.66.0.1` | `.10`, `.21`, `.22`, `.31`, `.32` |
+| Team dashboard | `8088/tcp` | `10.66.0.1` | `.10`, `.21`, `.22`, `.31`, `.32` |
+| Backend API — **Phase 7 extension** | `8100/tcp` | `10.66.0.1` | `.10`, `.12`, `.13`, `.14`, `.21`, `.22`, `.23`, `.24`; JWT authentication still required |
 | InfluxDB | `8086/tcp` | Docker internal network only | Telegraf and Grafana containers; no VPN or host binding |
 | MQTT plaintext | `1883/tcp` | **Not enabled anywhere** | None |
 | Restic backup | No listening port | Outbound from the server to the approved repository | Not a VPN client service |
@@ -98,11 +98,11 @@ services:
       - "10.66.0.1:8883:8883"
   team-dashboard:
     ports:
-      - "10.66.0.1:8080:8080"
+      - "10.66.0.1:8088:8088"
   # Phase 7 only:
   # backend:
   #   ports:
-  #     - "10.66.0.1:8000:8000"
+  #     - "10.66.0.1:8100:8100"
   influxdb:
     # No host "ports:" mapping.
     expose:
@@ -124,8 +124,7 @@ Then reload systemd and restart Docker through the normal administration procedu
 The following examples implement the SSH rows of the matrix. Add them only after the safe-rollout checks above:
 
 ```bash
-sudo ufw allow in on wg0 from 10.66.0.11 to 10.66.0.1 port 22 proto tcp
-sudo ufw allow in on wg0 from 10.66.0.12 to 10.66.0.1 port 22 proto tcp
+sudo ufw allow in on wg0 from 10.66.0.10 to 10.66.0.1 port 22 proto tcp
 sudo ufw allow in on wg0 from 10.66.0.21 to 10.66.0.1 port 22 proto tcp
 sudo ufw allow in on wg0 from 10.66.0.22 to 10.66.0.1 port 22 proto tcp
 ```
@@ -134,30 +133,23 @@ Do **not** restrict `sshd` with `ListenAddress 10.66.0.1` as part of this plan. 
 
 ### 4.4 Container rules: `DOCKER-USER`
 
-For Docker-published ports (`8883`, `3000`, `8080`, and Phase 7 `8000`), enforce source restrictions in the `DOCKER-USER` chain. The following is a minimal policy fragment for a dedicated server; integrate it into the reviewed firewall script rather than repeatedly pasting it into a live terminal:
+For Docker-published ports (`8883`, `3000`, `8088`, and Phase 7 `8100`), enforce source restrictions through the `DOCKER-USER` chain using `vpn/firewall/docker-user.sh`. Do not paste rules by hand.
 
-```bash
-# Return traffic first. The production script must avoid duplicate entries.
-sudo iptables -I DOCKER-USER -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+The script keeps all Project D rules in a dedicated chain, `PROJECTD-WG`, and inserts a single jump at the top of `DOCKER-USER`:
 
-# MQTT: members and simulator hosts.
-for ip in 10.66.0.11 10.66.0.12 10.66.0.15 10.66.0.21 10.66.0.22 10.66.0.25; do
-  sudo iptables -A DOCKER-USER -i wg0 -s "$ip" -p tcp --dport 8883 -j ACCEPT
-done
-
-# Grafana and team dashboard: members and faculty.
-for ip in 10.66.0.11 10.66.0.12 10.66.0.21 10.66.0.22 10.66.0.31 10.66.0.32; do
-  sudo iptables -A DOCKER-USER -i wg0 -s "$ip" -p tcp -m multiport --dports 3000,8080 -j ACCEPT
-done
-
-# Phase 7 only — backend: member laptops and individually enrolled phones.
-# for ip in 10.66.0.11 10.66.0.12 10.66.0.13 10.66.0.14 10.66.0.21 10.66.0.22 10.66.0.23 10.66.0.24; do
-#   sudo iptables -A DOCKER-USER -i wg0 -s "$ip" -p tcp --dport 8000 -j ACCEPT
-# done
-
-# Deny other VPN-originated traffic to forwarded container ports.
-sudo iptables -A DOCKER-USER -i wg0 -j DROP
+```text
+DOCKER-USER:  -i wg0 -j PROJECTD-WG        (position 1)
+              ... Docker's own rules, possibly ending with -j RETURN
+PROJECTD-WG:  RELATED,ESTABLISHED -> RETURN
+              allowed source + port -> RETURN   (one rule per allow-list entry)
+              everything else -> DROP
 ```
+
+Do **not** append a `DROP` to `DOCKER-USER` (`iptables -A DOCKER-USER -i wg0 -j DROP`). On Docker versions where `DOCKER-USER` ends with `-j RETURN`, an appended rule is never evaluated and every VPN peer reaches every published port. `tests/security/firewall-netns-test.sh` reproduces this failure with real packets and checks the replacement design (28 checks; no Docker or WireGuard needed).
+
+Rules match the **published host port** (`-m conntrack --ctorigdstport`), not the container port: `DOCKER-USER` sees packets after Docker's DNAT, so a plain `--dport` would follow any `host:container` mapping change in `compose.yml`. IPv6 is handled by binding every published port to `10.66.0.1` or `127.0.0.1` (no `[::]` listener, which `DOCKER-USER` would never see); `tests/security/test_compose_bindings.py` enforces this in CI.
+
+Allowed traffic returns to `DOCKER-USER` instead of being accepted there, so Docker's own isolation rules still run. `docker-user.sh --check` compares the installed rules with the reviewed allow list; `--remove` is the rollback.
 
 Host and container ports are identical in this plan. If Compose changes a container-side port, review the actual post-DNAT rule rather than assuming the host port still matches.
 

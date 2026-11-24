@@ -1,0 +1,50 @@
+2026-11-23T20:12:01.841190+00:00 elapsed=0s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+STOP_UTC=2026-11-23T20:12:01Z
+SERVICE_STOPPED=projectd-sim@szczecin
+2026-11-23T20:12:06.946980+00:00 elapsed=5s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:12:11.992068+00:00 elapsed=10s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:12:17.046489+00:00 elapsed=15s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:12:22.097049+00:00 elapsed=21s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:12:27.142400+00:00 elapsed=26s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:12:32.195942+00:00 elapsed=31s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:12:37.246206+00:00 elapsed=36s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:12:42.292631+00:00 elapsed=41s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:12:47.342135+00:00 elapsed=46s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:12:52.388596+00:00 elapsed=51s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:12:57.433584+00:00 elapsed=56s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:13:02.480364+00:00 elapsed=61s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:13:07.523988+00:00 elapsed=66s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:13:12.569183+00:00 elapsed=71s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:13:17.620107+00:00 elapsed=76s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:13:22.669338+00:00 elapsed=81s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:13:27.719214+00:00 elapsed=86s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:13:32.768383+00:00 elapsed=91s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:13:37.814582+00:00 elapsed=96s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:13:42.860108+00:00 elapsed=101s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:13:47.912773+00:00 elapsed=106s szcz={'SZCZ-AIR-01': 'Alerting', 'SZCZ-HUM-01': 'Alerting', 'SZCZ-TEMP-01': 'Alerting'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+FIRING_UTC=2026-11-23T20:13:47Z
+ALERT2_FIRED_AFTER_SECONDS=106
+HOLDING_ALERT_FOR_SECONDS=45
+RESTART_UTC=2026-11-23T20:14:32Z
+2026-11-23T20:14:37.991647+00:00 elapsed=5s szcz={'SZCZ-AIR-01': 'Alerting', 'SZCZ-HUM-01': 'Alerting', 'SZCZ-TEMP-01': 'Alerting'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:14:43.034473+00:00 elapsed=10s szcz={'SZCZ-AIR-01': 'Alerting', 'SZCZ-HUM-01': 'Alerting', 'SZCZ-TEMP-01': 'Alerting'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+2026-11-23T20:14:48.083366+00:00 elapsed=16s szcz={'SZCZ-AIR-01': 'Normal', 'SZCZ-HUM-01': 'Normal', 'SZCZ-TEMP-01': 'Normal'} mati={'MATI-AIR-01': 'Normal', 'MATI-HUM-01': 'Normal', 'MATI-TEMP-01': 'Normal'}
+RECOVERED_UTC=2026-11-23T20:14:48Z
+RECOVERED_AFTER_SECONDS=16
+active
+active
+ok
+
+{
+  "commit": "b0414de7ea38f8ab7dea5da778ff7f7e03b45188",
+  "service": "projectd-sim@szczecin",
+  "control_service": "projectd-sim@mati",
+  "stopped_utc": "2026-11-23T20:12:01+00:00",
+  "firing_utc": "2026-11-23T20:13:47+00:00",
+  "restart_utc": "2026-11-23T20:14:32+00:00",
+  "seconds_to_all_three_szczecin_alerts": 106,
+  "all_six_normal_after_recovery": true,
+  "email_delivery_tested": false,
+  "email_note": "SMTP disabled; this test covers Grafana alert state and recovery only."
+}
+ALERT2_TEST_STATUS=PASS

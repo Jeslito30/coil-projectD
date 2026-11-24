@@ -1,0 +1,8 @@
+# Local simulator files that must never be committed
+*/config.yaml
+*/secrets.env
+*.jsonl
+.venv/
+__pycache__/
+# Local copy of the public CA: keep the single source in docker/mosquitto/certs/
+*/ca.crt

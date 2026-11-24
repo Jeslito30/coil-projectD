@@ -1,0 +1,113 @@
+COMMIT=b0414de7ea38f8ab7dea5da778ff7f7e03b45188
+Python 3.12.3
+=== SIMULATOR ===
+test_anomaly_crosses_threshold_for_every_sensor (test_simulator.ContractTests.test_anomaly_crosses_threshold_for_every_sensor) ... ok
+test_canonical_examples_from_data_design_are_valid (test_simulator.ContractTests.test_canonical_examples_from_data_design_are_valid) ... ok
+test_every_sensor_produces_a_valid_reading_and_topic (test_simulator.ContractTests.test_every_sensor_produces_a_valid_reading_and_topic) ... ok
+test_normal_range_never_crosses_alert_thresholds (test_simulator.ContractTests.test_normal_range_never_crosses_alert_thresholds) ... ok
+test_password_variable_names_match_gen_passwd (test_simulator.ContractTests.test_password_variable_names_match_gen_passwd) ... ok
+test_random_walk_stays_in_range_and_respects_max_step (test_simulator.ContractTests.test_random_walk_stays_in_range_and_respects_max_step) ... ok
+test_status_topic (test_simulator.ContractTests.test_status_topic) ... ok
+test_validator_rejects_contract_violations (test_simulator.ContractTests.test_validator_rejects_contract_violations) ... ok
+test_whole_number_values_are_still_serialised_as_floats (test_simulator.ContractTests.test_whole_number_values_are_still_serialised_as_floats) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.175s
+
+OK
+=== SECURITY CONFIG ===
+test_every_published_port_has_a_specific_host_ip (tests.security.test_compose_bindings.ComposeBindingsTest.test_every_published_port_has_a_specific_host_ip) ... ok
+test_influxdb_is_not_published (tests.security.test_compose_bindings.ComposeBindingsTest.test_influxdb_is_not_published) ... ok
+test_vpn_ports_match_the_firewall_allow_list (tests.security.test_compose_bindings.ComposeBindingsTest.test_vpn_ports_match_the_firewall_allow_list) ... ok
+test_secret_variables_are_empty (tests.security.test_env_templates.EnvTemplateTest.test_secret_variables_are_empty) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.090s
+
+OK
+=== GRAFANA ===
+test_creates_viewers_and_writes_private_password_file (test_viewer_accounts.ViewerAccountsTest.test_creates_viewers_and_writes_private_password_file) ... ok
+test_dry_run_changes_nothing (test_viewer_accounts.ViewerAccountsTest.test_dry_run_changes_nothing) ... ok
+test_refuses_to_touch_server_admin (test_viewer_accounts.ViewerAccountsTest.test_refuses_to_touch_server_admin) ... ok
+test_rejects_bad_csv (test_viewer_accounts.ViewerAccountsTest.test_rejects_bad_csv) ... ok
+test_rerun_is_idempotent_and_repairs_role (test_viewer_accounts.ViewerAccountsTest.test_rerun_is_idempotent_and_repairs_role) ... ok
+test_wrong_admin_password_fails_cleanly (test_viewer_accounts.ViewerAccountsTest.test_wrong_admin_password_fails_cleanly) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 3.051s
+
+OK
+=== TELEGRAF ===
+test_all_six_registered_sensors_pass_with_delay (test_starlark_registry.RegistryTest.test_all_six_registered_sensors_pass_with_delay) ... ok
+test_city_and_type_must_match_registry (test_starlark_registry.RegistryTest.test_city_and_type_must_match_registry) ... ok
+test_missing_tags_dropped (test_starlark_registry.RegistryTest.test_missing_tags_dropped) ... ok
+test_payload_sensor_id_must_match_topic (test_starlark_registry.RegistryTest.test_payload_sensor_id_must_match_topic) ... ok
+test_registry_matches_data_design (test_starlark_registry.RegistryTest.test_registry_matches_data_design) ... ok
+test_unregistered_sensor_dropped (test_starlark_registry.RegistryTest.test_unregistered_sensor_dropped) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.003s
+
+OK
+=== INFLUX ===
+test_creates_scoped_tokens_and_keeps_env_private (test_scoped_tokens.ScopedTokensTest.test_creates_scoped_tokens_and_keeps_env_private) ... ok
+test_dry_run_changes_nothing (test_scoped_tokens.ScopedTokensTest.test_dry_run_changes_nothing) ... ok
+test_operator_token_not_leaked_on_error (test_scoped_tokens.ScopedTokensTest.test_operator_token_not_leaked_on_error) ... ok
+test_project_name_is_passed_to_compose (test_scoped_tokens.ScopedTokensTest.test_project_name_is_passed_to_compose) ... ok
+test_refuses_duplicates_without_rotate (test_scoped_tokens.ScopedTokensTest.test_refuses_duplicates_without_rotate) ... ok
+test_rotate_replaces_values_and_lists_old_ids (test_scoped_tokens.ScopedTokensTest.test_rotate_replaces_values_and_lists_old_ids) ... === TEAM DASHBOARD ===
+ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.932s
+
+OK
+test_missing_configuration_is_refused (test_publish_b2.PublishTest.test_missing_configuration_is_refused) ... Missing environment: INFLUX_TOKEN, B2_KEY_ID, B2_APP_KEY, B2_BUCKET
+ok
+test_nothing_secret_or_internal_is_published (test_publish_b2.PublishTest.test_nothing_secret_or_internal_is_published) ... 2026-11-23T19:54:03Z assets published: http://127.0.0.1:34449/file/projectd-dashboard/index.html
+2026-11-23T19:54:03Z summary published: {'ok': 3, 'out_of_range': 1, 'silent': 1, 'no_data': 1}
+ok
+test_publishes_page_assets_and_summary (test_publish_b2.PublishTest.test_publishes_page_assets_and_summary) ... 2026-11-23T19:54:03Z assets published: http://127.0.0.1:34449/file/projectd-dashboard/index.html
+2026-11-23T19:54:03Z summary published: {'ok': 3, 'out_of_range': 1, 'silent': 1, 'no_data': 1}
+ok
+test_upload_url_is_reused_and_expired_token_recovers (test_publish_b2.PublishTest.test_upload_url_is_reused_and_expired_token_recovers) ... 2026-11-23T19:54:03Z assets published: http://127.0.0.1:34449/file/projectd-dashboard/index.html
+2026-11-23T19:54:03Z summary published: {'ok': 3, 'out_of_range': 1, 'silent': 1, 'no_data': 1}
+ok
+test_influx_failure_returns_503_without_token (test_server.DashboardTest.test_influx_failure_returns_503_without_token) ... ok
+test_query_parameters_never_reach_flux (test_server.DashboardTest.test_query_parameters_never_reach_flux) ... ok
+test_security_headers_and_static (test_server.DashboardTest.test_security_headers_and_static) ... ok
+test_statuses (test_server.DashboardTest.test_statuses) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 1.189s
+
+OK
+=== WOL ===
+test_busy_target_is_rate_limited (test_wol_relay.RelayTest.test_busy_target_is_rate_limited) ... ok
+test_duplicate_request_republishes_identical_final_result (test_wol_relay.RelayTest.test_duplicate_request_republishes_identical_final_result) ... ok
+test_duplicate_survives_relay_restart (test_wol_relay.RelayTest.test_duplicate_survives_relay_restart) ... ok
+test_expired_command_rejected (test_wol_relay.RelayTest.test_expired_command_rejected) ... ok
+test_magic_packet_layout (test_wol_relay.RelayTest.test_magic_packet_layout) ... ok
+test_malformed_variants (test_wol_relay.RelayTest.test_malformed_variants) ... ok
+test_malformed_without_readable_id_reports_null (test_wol_relay.RelayTest.test_malformed_without_readable_id_reports_null) ... ok
+test_prune_keeps_recent_results (test_wol_relay.RelayTest.test_prune_keeps_recent_results) ... ok
+test_rate_limit_survives_restart (test_wol_relay.RelayTest.test_rate_limit_survives_restart) ... ok
+test_result_messages_match_contract_fields (test_wol_relay.RelayTest.test_result_messages_match_contract_fields) ... ok
+test_second_command_within_60_s_is_rate_limited (test_wol_relay.RelayTest.test_second_command_within_60_s_is_rate_limited) ... ok
+test_target_already_on_sends_no_packet (test_wol_relay.RelayTest.test_target_already_on_sends_no_packet) ... ok
+test_unfinished_request_after_crash_is_not_re_executed (test_wol_relay.RelayTest.test_unfinished_request_after_crash_is_not_re_executed) ... ok
+test_unknown_target_rejected (test_wol_relay.RelayTest.test_unknown_target_rejected) ... ok
+test_unplugged_target_times_out_after_180_s (test_wol_relay.RelayTest.test_unplugged_target_times_out_after_180_s) ... ok
+test_unsupported_action_checked_before_expiry (test_wol_relay.RelayTest.test_unsupported_action_checked_before_expiry) ... ok
+test_valid_command_target_off_reaches_reachable (test_wol_relay.RelayTest.test_valid_command_target_off_reaches_reachable) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.136s
+
+OK
+=== COMPILE ===
+COMPILE_OK
+=== SHELL ===
+SHELL_OK
+=== COMPOSE ===
+COMPOSE_OK

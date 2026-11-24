@@ -145,7 +145,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--url", default=os.environ.get("INFLUX_URL", "http://influxdb:8086"))
     parser.add_argument("--org", default=os.environ.get("INFLUX_ORG", "coil"))
-    parser.add_argument("--bucket", default=os.environ.get("INFLUX_BUCKET", "coil"))
+    parser.add_argument("--bucket", default=os.environ.get("INFLUX_BUCKET", "sensors"))
     parser.add_argument("--start", default="-1h", help="Negative Flux duration or RFC3339 time")
     parser.add_argument("--stop", help="Optional negative Flux duration or RFC3339 time")
     parser.add_argument("--scenario", choices=["normal", "interruption", "recovery", "other"], default="normal")

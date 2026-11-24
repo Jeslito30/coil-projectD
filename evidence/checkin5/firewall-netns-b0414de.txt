@@ -1,0 +1,77 @@
+debconf: unable to initialize frontend: Dialog
+debconf: (TERM is not set, so the dialog frontend is not usable.)
+debconf: falling back to frontend: Readline
+debconf: unable to initialize frontend: Readline
+debconf: (This frontend requires a controlling tty.)
+debconf: falling back to frontend: Teletype
+dpkg-preconfigure: unable to re-open stdin: 
+Selecting previously unselected package socat.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 127282 files and directories currently installed.)
+Preparing to unpack .../socat_1.8.0.0-4ubuntu0.1_amd64.deb ...
+Unpacking socat (1.8.0.0-4ubuntu0.1) ...
+Setting up socat (1.8.0.0-4ubuntu0.1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+debconf: unable to initialize frontend: Dialog
+debconf: (TERM is not set, so the dialog frontend is not usable.)
+debconf: falling back to frontend: Readline
+debconf: unable to initialize frontend: Readline
+debconf: (This frontend requires a controlling tty.)
+debconf: falling back to frontend: Teletype
+
+Running kernel seems to be up-to-date.
+
+No services need to be restarted.
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+== Baseline: no Project D rules (everything reachable) ==
+PASS  unrestricted before the script (10.66.0.50 -> :8883 open)
+
+== Rules left by the previous script version (ACCEPTs at the top, DROP after RETURN) ==
+PASS  legacy DROP after RETURN is never reached (10.66.0.50 -> :8883 open)
+
+== Apply /opt/coil-projectD/vpn/firewall/docker-user.sh twice (idempotence), ENABLE_PHASE7=0 ==
+PASS  legacy Project D rules removed from DOCKER-USER
+PASS  exactly one jump after two runs
+PASS  jump is evaluated before Docker's RETURN
+PASS  --check reports the installed policy as current
+PASS  Jeslito MQTT (10.66.0.10 -> :8883 open)
+PASS  Mykyta MQTT (10.66.0.21 -> :8883 open)
+PASS  Darek MQTT (10.66.0.22 -> :8883 open)
+PASS  member Grafana (10.66.0.21 -> :3000 open)
+PASS  faculty Grafana (10.66.0.31 -> :3000 open)
+PASS  faculty team dashboard (host 8088 -> container 9999) (10.66.0.31 -> :8088 open)
+PASS  host port 13000 closed although its container port 3000 is allowed (10.66.0.21 -> :13000 closed)
+PASS  faculty has no MQTT (10.66.0.31 -> :8883 closed)
+PASS  unknown peer MQTT (10.66.0.50 -> :8883 closed)
+PASS  unknown peer Grafana (10.66.0.50 -> :3000 closed)
+PASS  Phase 7 API closed while disabled (10.66.0.21 -> :8100 closed)
+PASS  Phase 7 monitor MQTT closed while disabled (10.66.0.16 -> :8883 closed)
+PASS  unlisted container port (10.66.0.21 -> :9999 closed)
+
+== ENABLE_PHASE7=1 ==
+PASS  Phase 7 monitor MQTT (10.66.0.16 -> :8883 open)
+PASS  Phase 7 member API (10.66.0.21 -> :8100 open)
+PASS  faculty has no Phase 7 API (10.66.0.31 -> :8100 closed)
+
+== Back to ENABLE_PHASE7=0 retracts Phase 7 ==
+PASS  Phase 7 monitor MQTT retracted (10.66.0.16 -> :8883 closed)
+PASS  Phase 7 member API retracted (10.66.0.21 -> :8100 closed)
+PASS  member MQTT still open (10.66.0.21 -> :8883 open)
+
+== Tampering is detected by --check ==
+PASS  --check detects an unreviewed rule
+PASS  re-applying removes the unreviewed rule (10.66.0.50 -> :8883 closed)
+
+== --remove rolls back ==
+PASS  unrestricted after --remove (10.66.0.50 -> :8883 open)
+
+Summary: 28 passed, 0 failed
+2026/11/23 20:56:11 socat[29012] W exiting on signal 15
+2026/11/23 20:56:11 socat[29014] W exiting on signal 15
+2026/11/23 20:56:11 socat[29013] W exiting on signal 15
+2026/11/23 20:56:11 socat[29016] W exiting on signal 15
+2026/11/23 20:56:11 socat[29015] W exiting on signal 15

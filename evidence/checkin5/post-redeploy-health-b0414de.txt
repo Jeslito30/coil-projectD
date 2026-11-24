@@ -1,0 +1,39 @@
+=== CONTAINERS ===
+coil-projectd-grafana-1|grafana/grafana:12.1.1|Up 30 minutes (healthy)
+coil-projectd-telegraf-1|telegraf:1.35.4|Up 30 minutes
+coil-projectd-team-dashboard-1|python:3.12-alpine|Up 30 minutes (healthy)
+coil-projectd-mosquitto-1|eclipse-mosquitto:2.0.22|Up 33 minutes
+coil-projectd-influxdb-1|influxdb:2.7.12|Up 33 minutes (healthy)
+=== SERVICES ===
+active
+active
+active
+active
+=== LISTENERS ===
+Netid State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                                                
+udp   UNCONN 0      0            0.0.0.0:51820      0.0.0.0:*                                                          
+udp   UNCONN 0      0         127.0.0.54:53         0.0.0.0:*    users:(("systemd-resolve",pid=532,fd=16))             
+udp   UNCONN 0      0      127.0.0.53%lo:53         0.0.0.0:*    users:(("systemd-resolve",pid=532,fd=14))             
+udp   UNCONN 0      0               [::]:51820         [::]:*                                                          
+tcp   LISTEN 0      4096       127.0.0.1:18883      0.0.0.0:*    users:(("docker-proxy",pid=11485,fd=8))               
+tcp   LISTEN 0      4096   127.0.0.53%lo:53         0.0.0.0:*    users:(("systemd-resolve",pid=532,fd=15))             
+tcp   LISTEN 0      4096       10.66.0.1:8088       0.0.0.0:*    users:(("docker-proxy",pid=14472,fd=8))               
+tcp   LISTEN 0      4096      127.0.0.54:53         0.0.0.0:*    users:(("systemd-resolve",pid=532,fd=17))             
+tcp   LISTEN 0      4096       10.66.0.1:3000       0.0.0.0:*    users:(("docker-proxy",pid=14360,fd=8))               
+tcp   LISTEN 0      4096       127.0.0.1:13000      0.0.0.0:*    users:(("docker-proxy",pid=14366,fd=8))               
+tcp   LISTEN 0      4096       10.66.0.1:8883       0.0.0.0:*    users:(("docker-proxy",pid=11475,fd=8))               
+tcp   LISTEN 0      4096         0.0.0.0:22         0.0.0.0:*    users:(("sshd",pid=911,fd=3),("systemd",pid=1,fd=130))
+tcp   LISTEN 0      4096       127.0.0.1:18088      0.0.0.0:*    users:(("docker-proxy",pid=14479,fd=8))               
+tcp   LISTEN 0      4096            [::]:22            [::]:*    users:(("sshd",pid=911,fd=4),("systemd",pid=1,fd=132))
+=== CLOCK ===
+Timezone=Europe/Warsaw
+NTPSynchronized=yes
+TimeUSec=Mon 2026-11-23 20:53:22 CET
+=== HEALTH ===
+{
+  "database": "ok",
+  "version": "12.1.1",
+  "commit": "df5de8219b41d1e639e003bf5f3a85913761d167"
+}
+ok
+

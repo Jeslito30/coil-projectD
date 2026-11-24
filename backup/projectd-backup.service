@@ -1,0 +1,25 @@
+[Unit]
+Description=Encrypted Project D backup
+Documentation=https://github.com/Jeslito30/coil-projectD
+Wants=network-online.target docker.service
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+# Defaults; /etc/projectd/backup.env (optional, see backup/backup.env.example) overrides them,
+# e.g. another checkout path or the compose/.env files of a hand-built stack.
+Environment=PROJECT_ROOT=/opt/coil-projectD
+Environment=BACKUP_ENV=/etc/projectd/restic.env
+EnvironmentFile=-/etc/projectd/backup.env
+ExecStart=/bin/bash -c 'exec "$PROJECT_ROOT/backup/backup.sh"'
+WorkingDirectory=/
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=6
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

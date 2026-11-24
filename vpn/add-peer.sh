@@ -136,10 +136,10 @@ install -m 600 "$CONFIG_FILE" "$BACKUP"
 printf '\n[Peer]\n# %s\nPublicKey  = %s\nAllowedIPs = %s/32\n' \
   "$NAME" "$PUBLIC_KEY" "$IP" >> "$CONFIG_FILE"
 
-if ! wg syncconf "$INTERFACE" < <(wg-quick strip "$CONFIG_FILE"); then
+if ! wg syncconf "$INTERFACE" <(wg-quick strip "$CONFIG_FILE"); then
   echo "syncconf failed; restoring $BACKUP" >&2
   install -m 600 "$BACKUP" "$CONFIG_FILE"
-  wg syncconf "$INTERFACE" < <(wg-quick strip "$CONFIG_FILE") || true
+  wg syncconf "$INTERFACE" <(wg-quick strip "$CONFIG_FILE") || true
   exit 1
 fi
 

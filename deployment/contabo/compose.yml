@@ -1,0 +1,163 @@
+name: coil-projectd
+
+# Run from the repository root with:
+# docker compose --env-file deployment/contabo/.env -f deployment/contabo/compose.yml up -d
+# Only MQTT and Grafana have host bindings. InfluxDB is reachable only on the private network.
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0.22
+    restart: unless-stopped
+    ports:
+      - "10.66.0.1:8883:8883"
+      - "127.0.0.1:18883:8883"
+    volumes:
+      - ../../docker/mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ../../docker/mosquitto/config/acl:/mosquitto/config/acl:ro
+      - ../../docker/mosquitto/config/passwd:/mosquitto/config/passwd:ro
+      - ../../docker/mosquitto/certs:/mosquitto/certs:ro
+      - mosquitto-data:/mosquitto/data
+    networks: [projectd]
+
+  telegraf:
+    image: telegraf:1.35.4
+    restart: unless-stopped
+    depends_on:
+      - mosquitto
+      - influxdb
+    environment:
+      MQTT_TELEGRAF_USERNAME: telegraf
+      MQTT_TELEGRAF_PASSWORD: ${MQTT_TELEGRAF_PASSWORD:?set MQTT_TELEGRAF_PASSWORD in .env}
+      # Write-only token for the sensors bucket (scoped_tokens.py); falls back to the operator token.
+      INFLUX_TOKEN: ${INFLUX_TELEGRAF_TOKEN:-${INFLUX_TOKEN:?set INFLUX_TOKEN in .env}}
+      INFLUX_ORG: ${INFLUX_ORG:-coil}
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - ../../docker/mosquitto/certs/ca.crt:/etc/telegraf/ca.crt:ro
+    networks: [projectd]
+
+  influxdb:
+    image: influxdb:2.7.12
+    restart: unless-stopped
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: ${INFLUX_ADMIN_USER:?set INFLUX_ADMIN_USER in .env}
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_ADMIN_PASSWORD:?set INFLUX_ADMIN_PASSWORD in .env}
+      DOCKER_INFLUXDB_INIT_ORG: ${INFLUX_ORG:-coil}
+      DOCKER_INFLUXDB_INIT_BUCKET: sensors
+      DOCKER_INFLUXDB_INIT_RETENTION: 720h
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN:?set INFLUX_TOKEN in .env}
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    healthcheck:
+      test: ["CMD", "influx", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks: [projectd]
+
+  grafana:
+    image: grafana/grafana:12.1.1
+    restart: unless-stopped
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    ports:
+      - "10.66.0.1:3000:3000"
+      - "127.0.0.1:13000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD in .env}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_SECURITY_COOKIE_SECURE: "false"
+      GF_SMTP_ENABLED: ${GF_SMTP_ENABLED:-false}
+      GF_SMTP_HOST: ${GF_SMTP_HOST:-}
+      GF_SMTP_FROM_ADDRESS: ${GF_SMTP_FROM_ADDRESS:-}
+      GF_SMTP_FROM_NAME: Project D
+      GF_SMTP_USER: ${GF_SMTP_USER:-}
+      GF_SMTP_PASSWORD: ${GF_SMTP_PASSWORD:-}
+      GRAFANA_ALERT_EMAIL: ${GRAFANA_ALERT_EMAIL:?set GRAFANA_ALERT_EMAIL in .env}
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_ORG: ${INFLUX_ORG:-coil}
+      # Read-only token for the sensors bucket (scoped_tokens.py); falls back to the operator token.
+      INFLUX_TOKEN: ${INFLUX_GRAFANA_TOKEN:-${INFLUX_TOKEN:?set INFLUX_TOKEN in .env}}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ../../grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ../../grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ../../grafana/provisioning/alerting:/etc/grafana/provisioning/alerting:ro
+      - ../../grafana/dashboard-two-cities.json:/var/lib/grafana/dashboards/project-d-two-cities.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/health | grep -q ok"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks: [projectd]
+
+  team-dashboard:
+    # Team Dashboard v1 (team-dashboard/): read-only live view on 8088, VPN and loopback only.
+    image: python:3.12-alpine
+    restart: unless-stopped
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    command: ["python", "/app/server.py"]
+    user: "65534:65534"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    ports:
+      - "10.66.0.1:8088:8088"
+      - "127.0.0.1:18088:8088"
+    environment:
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_ORG: ${INFLUX_ORG:-coil}
+      # Read-only token: a dedicated one, else Grafana's read-only token, else the operator token.
+      INFLUX_TOKEN: ${INFLUX_DASHBOARD_TOKEN:-${INFLUX_GRAFANA_TOKEN:-${INFLUX_TOKEN:?set INFLUX_TOKEN in .env}}}
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      - ../../team-dashboard:/app:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8088/healthz', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks: [projectd]
+
+  public-mirror:
+    # Optional push-only public copy of the Team Dashboard on a public B2 bucket (team-dashboard/README.md).
+    # Outbound HTTPS only; no port is published. Enable with: --profile public-mirror
+    image: python:3.12-alpine
+    profiles: ["public-mirror"]
+    restart: unless-stopped
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    command: ["python", "/app/publish_b2.py"]
+    user: "65534:65534"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_ORG: ${INFLUX_ORG:-coil}
+      INFLUX_TOKEN: ${INFLUX_DASHBOARD_TOKEN:-${INFLUX_GRAFANA_TOKEN:-${INFLUX_TOKEN:?set INFLUX_TOKEN in .env}}}
+      B2_KEY_ID: ${MIRROR_B2_KEY_ID:-}
+      B2_APP_KEY: ${MIRROR_B2_APP_KEY:-}
+      B2_BUCKET: ${MIRROR_B2_BUCKET:-}
+      PUBLISH_INTERVAL: ${MIRROR_INTERVAL:-60}
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      - ../../team-dashboard:/app:ro
+    networks: [projectd]
+
+networks:
+  projectd:
+    driver: bridge
+
+volumes:
+  mosquitto-data:
+  influxdb-data:
+  grafana-data:

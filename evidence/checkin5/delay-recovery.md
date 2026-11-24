@@ -1,0 +1,20 @@
+# Project D — delay analysis
+
+- Generated UTC: `20261123T200727Z`
+- Window: `2026-11-23T20:02:34Z` to `2026-11-23T20:05:00Z`
+- Scenario: **recovery** (separate normal and recovery runs)
+- Metric: Telegraf processing time minus payload timestamp; not pure network latency
+- p95 method: nearest-rank; negative values retained as clock diagnostics
+
+| Scope | City / sensor | Count | Mean ms | Median ms | p95 ms | Min ms | Max ms | Negative |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| city | Mati | 15 | 1.639 | 1.606 | 2.191 | 1.128 | 2.191 | 0 |
+| city | Szczecin | 15 | 10.921 | 2.192 | 47.370 | 1.154 | 47.370 | 0 |
+| sensor | MATI-AIR-01 | 5 | 1.598 | 1.606 | 2.191 | 1.128 | 2.191 | 0 |
+| sensor | MATI-HUM-01 | 5 | 1.560 | 1.481 | 2.175 | 1.138 | 2.175 | 0 |
+| sensor | MATI-TEMP-01 | 5 | 1.758 | 1.622 | 2.102 | 1.461 | 2.102 | 0 |
+| sensor | SZCZ-AIR-01 | 5 | 10.783 | 1.627 | 47.304 | 1.224 | 47.304 | 0 |
+| sensor | SZCZ-HUM-01 | 5 | 10.666 | 1.373 | 47.370 | 1.154 | 47.370 | 0 |
+| sensor | SZCZ-TEMP-01 | 5 | 11.313 | 2.308 | 46.750 | 2.230 | 46.750 | 0 |
+
+Attach chrony offsets, simulator restart times and the exact query window to this report.

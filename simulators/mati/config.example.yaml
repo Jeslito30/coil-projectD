@@ -1,0 +1,23 @@
+# Mati simulator configuration (Project D, data-design.md v0.2).
+# Copy to config.yaml next to this file; real configuration and secrets are git-ignored.
+# Set the three sensor credentials in the environment or pass --secrets-file.
+
+city: Mati
+
+broker:
+  host: 10.66.0.1
+  port: 8883
+  ca_file: ca.crt
+  keepalive: 30
+
+interval_seconds: 30
+queue_limit: 2000
+log_file: simulator-mati.jsonl
+
+sensors:
+  - sensor_id: MATI-TEMP-01
+    sensor_type: temperature
+  - sensor_id: MATI-HUM-01
+    sensor_type: humidity
+  - sensor_id: MATI-AIR-01
+    sensor_type: airquality

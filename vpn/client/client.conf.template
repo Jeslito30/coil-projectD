@@ -8,7 +8,7 @@ PrivateKey = <LOCALLY_GENERATED_PRIVATE_KEY>
 MTU        = 1420
 
 [Peer]
-PublicKey           = <SERVER_PUBLIC_KEY>
+PublicKey           = DQUHsmYKM1uRkt6emmTbVfrx5uSAH5BISvLAuLkUlmA=
 Endpoint            = <CLOUD_VM_PUBLIC_IP>:51820
 AllowedIPs          = 10.66.0.0/24
 PersistentKeepalive = 25

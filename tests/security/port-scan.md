@@ -15,7 +15,7 @@
 | SSH `22/tcp` | No Project D public administration path | Member laptops `.11`, `.12`, `.21`, `.22` only; no forced `sshd ListenAddress 10.66.0.1` |
 | MQTT TLS `8883/tcp` | Closed / not published | Approved members, simulators and explicitly enabled Phase 7 agents |
 | Grafana `3000/tcp` | Closed / not published | Members and faculty |
-| Team dashboard `8080/tcp` | Closed / not published | Members and faculty |
+| Team dashboard `8088/tcp` | Closed / not published | Members and faculty |
 | Backend `8000/tcp` — Phase 7 | Closed / not published; absent in core | Member laptops and phones `.13`, `.14`, `.23`, `.24` when extension enabled |
 | InfluxDB `8086/tcp` | Closed / no host or VPN binding | Docker internal network only |
 | MQTT plaintext `1883/tcp` | Closed / no listener | Not enabled internally either |
@@ -25,7 +25,7 @@
 Record exact commands and save redacted output separately. Example TCP scan from an authorised external host:
 
 ```bash
-nmap -Pn -sT -sV -p 22,1883,3000,8000,8080,8086,8883 <cloud-vm-public-ip>
+nmap -Pn -sT -sV -p 22,1883,3000,8000,8080,8086,8088,8883 <cloud-vm-public-ip>
 ```
 
 For UDP, use an authorised, scoped scan and corroborate it:
@@ -46,6 +46,7 @@ UDP `open|filtered` is not proof that a service is usable or absent. Confirm the
 | `8000/tcp` | | | | |
 | `8080/tcp` | | | | |
 | `8086/tcp` | | | | |
+| `8088/tcp` | | | | |
 | `8883/tcp` | | | | |
 
 ## Decision and exceptions

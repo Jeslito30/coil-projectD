@@ -1,0 +1,10 @@
+# gitleaks configuration for the CI tree scan (.github/workflows/test.yml). Default rules stay on.
+# Exception: the .env template. Its generic-api-key match spans an empty "PASSWORD=" line and the next
+# line, which allowlist regexes cannot express reliably. Instead, tests/security/test_env_templates.py
+# asserts that every secret-like variable in the template has an EMPTY value.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Env template; secret values are enforced empty by tests/security/test_env_templates.py"
+paths = ['''deployment/contabo/\.env\.example$''']
