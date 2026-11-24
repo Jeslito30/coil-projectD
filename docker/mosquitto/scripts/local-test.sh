@@ -51,6 +51,13 @@ else
   echo; echo "Security test script not found at $SEC_TEST (pass its path as the first argument)."
 fi
 
+ABUSE_TEST="$(dirname -- "$SEC_TEST")/broker_abuse_test.py"
+if [[ -f "$ABUSE_TEST" ]]; then
+  echo; echo "== tests/security/broker_abuse_test.py (client-ID takeover, oversized packet) =="
+  set -a; source "$WORK/secrets.env"; set +a
+  MQTT_CA="$WORK/certs/ca.crt" MQTT_BROKER=127.0.0.1 MQTT_PORT="$PORT" python3 "$ABUSE_TEST" || status=1
+fi
+
 echo; echo "== Broker log: denied/refused events =="
 grep -iE "denied|not authorised|bad user|unknown protocol|certificate" "$WORK/broker.log" | head -10 || true
 exit "$status"

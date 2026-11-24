@@ -66,6 +66,28 @@ sleep 1.5
 CA="$WORK/certs/ca.crt"
 sub() { mosquitto_sub -h 127.0.0.1 -p "$PORT" --cafile "$CA" -u backend -P "$BACKEND_PW" -q 1 "$@"; }
 pub() { mosquitto_pub -h 127.0.0.1 -p "$PORT" --cafile "$CA" -q 1 "$@"; }
+# The broker forces client ID = username, so the backend must publish and subscribe on ONE connection
+# (two concurrent "backend" connections would take each other over). This helper does both.
+backend_cmd() {  # backend_cmd PAYLOAD COUNT TIMEOUT_SECONDS > results
+  python3 - "$PORT" "$CA" "$BACKEND_PW" "$1" "$2" "$3" <<'PY'
+import sys, time, paho.mqtt.client as mqtt
+port, ca, pw, payload, count, timeout = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], int(sys.argv[5]), float(sys.argv[6])
+got = []
+c = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id="backend", protocol=mqtt.MQTTv311)
+c.username_pw_set("backend", pw); c.tls_set(ca_certs=ca)
+c.on_message = lambda cl, u, m: got.append(m.payload.decode())
+c.connect("127.0.0.1", int(port)); c.loop_start()
+c.subscribe("coil/szczecin/wol/pl-wol-relay/result", qos=1); time.sleep(0.5)
+if payload:
+    c.publish("coil/szczecin/wol/pl-wol-relay/cmd", payload, qos=1).wait_for_publish(5)
+end = time.time() + timeout
+while len(got) < count and time.time() < end:
+    time.sleep(0.1)
+c.loop_stop(); c.disconnect()
+print("\n".join(got))
+PY
+}
+
 pass=0; fail=0
 ok() { echo "PASS  $1"; pass=$((pass + 1)); }
 bad() { echo "FAIL  $1"; fail=$((fail + 1)); }
@@ -75,30 +97,24 @@ bad() { echo "FAIL  $1"; fail=$((fail + 1)); }
 now="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"; exp="$(date -u -d '+60 seconds' +%Y-%m-%dT%H:%M:%S.000Z)"
 rid="$(python3 -c 'import uuid; print(uuid.uuid4())')"
 cmd="{\"schema_version\":1,\"request_id\":\"$rid\",\"action\":\"wake\",\"target_id\":\"SZCZ-PC-01\",\"requested_by\":\"darek\",\"requested_at_utc\":\"$now\",\"expires_at_utc\":\"$exp\"}"
-sub -t coil/szczecin/wol/pl-wol-relay/result -C 3 -W 30 > "$WORK/results1.txt" 2>/dev/null & SUB=$!
-sleep 0.5
-pub -u backend -P "$BACKEND_PW" -t coil/szczecin/wol/pl-wol-relay/cmd -m "$cmd"
-wait "$SUB" || true
+backend_cmd "$cmd" 3 30 > "$WORK/results1.txt"
 states="$(python3 -c 'import json,sys; print(" ".join(json.loads(l)["state"] for l in open(sys.argv[1])))' "$WORK/results1.txt")"
 [[ "$states" == "accepted packet_sent reachable" ]] && ok "test 1: accepted -> packet_sent -> reachable over the broker" || bad "test 1 states: $states"
 grep -q "magic packet received" "$WORK/computer.log" && ok "fake computer received the magic packet" || bad "no magic packet"
 
-sub -t coil/szczecin/wol/pl-wol-relay/result -C 1 -W 10 > "$WORK/results2.txt" 2>/dev/null & SUB=$!
-sleep 0.5
-pub -u backend -P "$BACKEND_PW" -t coil/szczecin/wol/pl-wol-relay/cmd -m "$cmd"
-wait "$SUB" || true
+backend_cmd "$cmd" 1 10 > "$WORK/results2.txt"
 if cmp -s <(tail -n 1 "$WORK/results1.txt") "$WORK/results2.txt"; then ok "test 5: duplicate request_id re-publishes the identical final result"
 else bad "test 5: duplicate result differs"; fi
 packets="$(grep -c '"event": "result"' "$WORK/audit.jsonl" || true)"
 [[ "$packets" == 4 ]] && ok "no second execution (4 result events in the audit log)" || bad "audit shows $packets result events"
 
-sub -t coil/szczecin/wol/pl-wol-relay/result -C 1 -W 4 > "$WORK/results3.txt" 2>/dev/null & SUB=$!
-sleep 0.5
+backend_cmd "" 1 4 > "$WORK/results3.txt" & SUB=$!
+sleep 0.8
 set -a; source "$WORK/secrets.env"; set +a
 pub -u SZCZ-TEMP-01 -P "$MQTT_SZCZ_TEMP_01_PASSWORD" -t coil/szczecin/wol/pl-wol-relay/cmd \
   -m "${cmd/$rid/$(python3 -c 'import uuid; print(uuid.uuid4())')}" 2>/dev/null || true
 wait "$SUB" || true
-[[ ! -s "$WORK/results3.txt" ]] && ok "test 8: sensor account cannot command the relay (ACL)" || bad "test 8: relay reacted to a sensor's command"
+[[ -z "$(tr -d '[:space:]' < "$WORK/results3.txt")" ]] && ok "test 8: sensor account cannot command the relay (ACL)" || bad "test 8: relay reacted to a sensor's command"
 
 kill -9 "$RELAY_PID"; sleep 13
 [[ "$(sub -t coil/szczecin/status/pl-wol-relay -C 1 -W 5 2>/dev/null)" == offline ]] && ok "test 9: Last Will sets status offline after kill -9" || bad "test 9: status not offline"
