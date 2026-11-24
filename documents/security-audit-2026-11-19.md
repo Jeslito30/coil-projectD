@@ -8,10 +8,10 @@
 
 | # | Severity | Area | Finding | Status |
 | --- | --- | --- | --- | --- |
-| 1 | High | Broker | Any authenticated sensor can take over Telegraf's MQTT client ID and repeatedly disconnect it. Ingestion stops for both cities. *Reproduced.* | Fixed in repo (`use_username_as_clientid`); **live broker still affected** |
+| 1 | High | Broker | Any authenticated sensor can take over Telegraf's MQTT client ID and repeatedly disconnect it. Ingestion stops for both cities. *Reproduced.* | Fixed in repo (`use_username_as_clientid`); **live broker fixed 24 Nov** (see Remediation status) |
 | 2 | High | Firewall | `docker-user.sh` appended its DROP after Docker's `RETURN`, so it restricted nothing. *Reproduced.* | Fixed in repo; was never applied on Contabo |
 | 3 | High | Host | Coolify publishes 6001/6002/8000/8080 on all IPv4/IPv6 interfaces; no provider firewall; UFW inactive; INPUT policy ACCEPT | Admin decision (outside Project D) |
-| 4 | Medium | Broker | No packet size limit: a sensor can publish up to 256 MB to its own topic (Telegraf memory). *Reproduced.* | Fixed in repo (`max_packet_size 16384`); **live broker still affected** |
+| 4 | Medium | Broker | No packet size limit: a sensor can publish up to 256 MB to its own topic (Telegraf memory). *Reproduced.* | Fixed in repo (`max_packet_size 16384`); **live broker fixed 24 Nov** (see Remediation status) |
 | 5 | Medium | Host | Docker is not ordered after `wg0`. With ports bound to 10.66.0.1, Mosquitto and Grafana may stay down after a reboot | Fixed in repo (systemd drop-in); **live host: install the drop-in** |
 | 6 | Medium | Backup | The server can delete its own snapshots (`restic forget --prune`); the host also runs internet-facing Coolify | `RESTIC_APPEND_ONLY=1` added; needs an append-only backend |
 | 7 | Medium | Grafana | 12.1.1 is behind several 12.1.x security releases (up to `v12.1.10+security-01`) | Upgrade on the dedicated VPS after reading the release notes |
@@ -68,3 +68,12 @@ See the summary table. Findings 8 and 9 only take effect with the repository com
 4. Optional: `vpn/firewall/docker-user.sh` (affects only `wg0` traffic; `--remove` rolls it back).
 
 Everything else is planned for the dedicated VPS.
+
+## Remediation status — 24 Nov 2026
+
+Published after the production broker was patched, so findings 1 and 4 no longer describe a live weakness.
+
+- **Production (Contabo), reported by Jeslito on 24 Nov:** Mosquitto 2.1.2 running with `use_username_as_clientid true` and `max_packet_size 16384`; ACL file owned `1883:1883`, mode `640`; configuration validated, broker restarted, Telegraf reconnected, all three Mati sensors publishing to InfluxDB. A negative ACL test passed (an authenticated sensor publishing to a topic outside its ACL got `Not authorized`).
+- **Still to evidence on production:** the ACL test confirms authorisation, not finding 1 itself. Running `tests/security/broker_abuse_test.py` against the production broker (client-ID takeover and 1 MB publish) closes findings 1 and 4 with a direct negative test.
+- **Repository:** both fixes and their regression tests are in `docker/mosquitto/config/mosquitto.conf`, `deployment/contabo/telegraf.conf` and `tests/security/broker_abuse_test.py`.
+- Findings 2, 3 and 5 keep their status above; the Contabo host exposure (finding 3) remains an owner decision outside Project D.
